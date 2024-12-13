@@ -1,0 +1,67 @@
+Administration Management
+
+1) Notice Board Setup
+a. There is going to be a Master table for notice type named 'notice_type'.
+b. Few of the notice types will be default and when any company sets up notice, they find the default options to select from.
+c. In case they want to add more notice type as option, they can do so and the entry gets adds up in the master table and the is_default value is set as FALSE. However, the type becomes a company specific notice and gets adds up on company notice along with the one the user has selected while setup.
+
+2) Publishing a Notice
+a. Only the people among HR who are allowed the permission will be able to post notice.
+b. While the user is giving input for the notice, notice type will appear as drop-down in the front-end. The types of notice in the drop-down is going to be restricted to the one which the company-specific notice type dictates.
+c. Rest of the input are intuitive enough.
+d. Once the validity expires, the notice record has to be archived.
+e. HR will be able to attach files with the record.
+
+3) Notification for the Notice
+a. For notification, a notice can be tagged to either a department or a unit. In each case, all the member of the dept./unit is going to get the notification of the notice. There has to be an option for ALL where every employee will get the notification. Multiple dept. / units can be selected.
+b. In case of selected dept. the entry goes to the 'Notice_Dept' table. In case for the unit, it goes to the 'Notice_Unit' table. 
+c. In case someone didn't open a notice before the deadline, send a notification about the unchecked notice 1 day before the notice lapses.
+
+
+
+
+Complaint Management
+  
+1) Complaint type and Company Specific complaints work the same way as per the notice type and company specific notice.
+
+2) Complaint Records:
+a. Any user will be able to file a complaint.
+b. The complaints are going to be saved as TASKS for the assigned HR while assigning the role. There has to be a certain user in the company to handle each of the Administrative tasks.
+c. Once a complaint has been filed, it goes to the REQUEST section of the complainer for checking the status of the complaint and all other details until it is resolved and archived.
+d. Default status of the complaint needs to be 'Pending' until 'Resolved'.
+e. Someone can only put a remark once the Status is 'Resolved'.
+f. Users will be able to attach files with the record.
+
+
+
+Claim Management
+
+1) By this feature, users will be able to claim / ask for the expenses occurred during working (Indemnification).
+2) There will be no Master Table but company specific tables where, the users will be able to claim only for those items approved before hand by the company in the company-specific table.
+3) Rest of the advices are intuitive and given as comments.
+
+
+
+Requisition Management
+
+1) Requisition types are recorded in the company-specific table
+
+2) Requisition Record:
+a. The record can be used for both adding and deducting items from the inventory list.
+b. Each requisition record is going to be recorded as a TASK for the HR handling it and as a request for the user who has given the input / requisition.
+c. Need to record whether it is approved / discarded / added. Approved means to give out the item to the user giving requisition. One of the 3 above columns will be filled and the other ones are going to remain null. Multiple columns cannot remain filled. 
+
+if Approved = true, subtract quantity from balance; otherwise do nothing.
+if discarded = true, subtract quantity from balance; otherwise do nothing.
+if added = true, add quantity to the balance; otherwise do nothing.
+
+** If Current Balance < 0 of the item, we cannot approve / discard the item, though we can give a requisition.
+ 
+
+3) Requisition Inventory:
+a. Whenever a requisition record is created and if any of the approved / discarded / added is set as true, auto generate a record by adding / subtracting from the previous company_id and requisition_type record of this table and generate a new 'Current Balance' in the table.
+b. We also use the 'Current Balance' to check the inventory if any user (with access) gives request.
+
+
+
+

@@ -1,0 +1,150 @@
+erDiagram
+    %% Core Organization Structure
+    companies ||--o{ departments : has
+    companies ||--o{ employees : employs
+
+    %% Employee Management
+    employees ||--|| employee_personal_info : has
+    employees ||--o{ employee_positions : holds
+    employees ||--o{ salary_records : receives
+    employees ||--o{ documents : has
+    employees ||--o{ compensation_benefits : receives
+
+    %% New Salary Management
+    salary_records {
+        serial salary_id PK
+        varchar employee_id FK
+        date effective_date
+        decimal base_salary
+        varchar currency
+        varchar change_reason
+        varchar created_by FK
+        timestamp created_at
+    }
+
+    %% New Benefits Management
+    compensation_benefits {
+        serial benefit_id PK
+        varchar employee_id FK
+        varchar benefit_type
+        date effective_date
+        date end_date
+        jsonb benefit_details
+        decimal monetary_value
+        timestamp created_at
+    }
+
+    %% New Document Management
+    documents {
+        serial document_id PK
+        varchar entity_type
+        varchar entity_id
+        varchar document_type
+        varchar document_path
+        timestamp upload_date
+        varchar uploaded_by FK
+        date expiry_date
+        boolean is_mandatory
+    }
+
+    %% Enhanced Position Management with History
+    employee_positions {
+        varchar employee_id FK
+        varchar position_id FK
+        date start_date
+        date end_date
+        boolean is_current
+        decimal starting_salary
+        text change_reason
+        varchar approved_by FK
+        timestamp created_at
+    }
+
+    %% Document Categories and Types
+    document_types ||--o{ documents : categorizes
+    document_types {
+        varchar type_id PK
+        varchar type_name
+        text description
+        boolean requires_renewal
+        int renewal_period_months
+    }
+
+    %% Salary Components
+    salary_components ||--o{ salary_records : includes
+    salary_components {
+        serial component_id PK
+        varchar component_name
+        varchar component_type
+        boolean taxable
+        text description
+    }
+
+    %% Benefits Management
+    benefit_plans ||--o{ compensation_benefits : defines
+    benefit_plans {
+        varchar plan_id PK
+        varchar plan_name
+        varchar plan_type
+        jsonb coverage_details
+        date effective_date
+        date end_date
+    }
+
+    %% Audit Trail for Critical Entities
+    audit_logs {
+        serial audit_id PK
+        varchar table_name
+        varchar record_id
+        varchar action_type
+        jsonb old_values
+        jsonb new_values
+        varchar changed_by FK
+        timestamp changed_at
+    }
+
+    %% Core Entity Relationships
+    salary_records ||--o{ audit_logs : tracks_changes
+    documents ||--o{ audit_logs : tracks_changes
+    employee_positions ||--o{ audit_logs : tracks_changes
+    compensation_benefits ||--o{ audit_logs : tracks_changes
+
+    %% Document Relationships
+    employees ||--o{ documents : owns
+    positions ||--o{ documents : requires
+    companies ||--o{ documents : maintains
+    
+    %% Salary Relationships
+    positions ||--o{ salary_components : defines_default
+    departments ||--o{ salary_components : has_budget
+
+    employees {
+        varchar employee_id PK
+        varchar company_id FK
+        varchar first_name
+        varchar last_name
+        varchar email
+        varchar phone
+        date hire_date
+        timestamp created_at
+    }
+
+    positions {
+        varchar position_id PK
+        varchar department_id FK
+        varchar position_name
+        text position_description
+        decimal salary_grade
+        decimal salary_range_min
+        decimal salary_range_max
+        timestamp created_at
+    }
+
+    departments {
+        varchar department_id PK
+        varchar company_id FK
+        varchar department_name
+        text department_description
+        decimal budget_allocation
+        timestamp created_at
+    }

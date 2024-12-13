@@ -1,0 +1,106 @@
+erDiagram
+    %% Core Organization Structure
+    companies ||--o{ departments : has
+    companies ||--o{ industries : belongs_to
+    companies ||--o{ employees : employs
+    companies ||--o{ site_locations : has
+    companies ||--o{ work_shifts : defines
+    companies ||--o{ stakeholders : has
+    companies ||--o{ leave_policies : defines
+
+    departments ||--o{ positions : has
+
+    %% Employee Management
+    employees ||--|| employee_personal_info : has
+    employees ||--o{ employee_positions : holds
+    employees ||--o{ employee_addresses : has
+    employees ||--o{ leave_requests : submits
+    employees ||--o{ attendance_records : logs
+    employees ||--o{ performance_reviews : receives
+    employees ||--o{ users : has_account
+
+    positions ||--o{ employee_positions : assigned_to
+    positions ||--o{ kpis : evaluated_by
+
+    %% Address Management
+    addresses ||--o{ employee_addresses : used_in
+    addresses ||--o{ site_locations : located_at
+    addresses ||--o{ stakeholders : located_at
+
+    %% Leave Management
+    leave_types ||--o{ leave_policies : defines
+    leave_types ||--o{ leave_requests : type_of
+
+    %% Attendance Management
+    work_shifts ||--o{ attendance_records : follows
+    site_locations ||--o{ attendance_records : recorded_at
+
+    %% Performance Management
+    kpi_categories ||--o{ kpis : contains
+    performance_reviews ||--o{ performance_review_details : contains
+    kpis ||--o{ performance_review_details : evaluated_in
+
+    %% Stakeholder Management
+    stakeholder_categories ||--o{ stakeholders : categorizes
+    stakeholders ||--o{ contracts : has
+
+    %% User Authentication
+    users ||--o{ user_roles : has
+    roles ||--o{ user_roles : assigned_to
+    roles ||--o{ role_permissions : has
+    permissions ||--o{ role_permissions : granted_to
+
+    companies {
+        varchar company_id PK
+        varchar company_name
+        varchar company_code
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    employees {
+        varchar employee_id PK
+        varchar company_id FK
+        varchar first_name
+        varchar last_name
+        varchar email
+        varchar phone
+        date hire_date
+        timestamp created_at
+    }
+
+    departments {
+        varchar department_id PK
+        varchar company_id FK
+        varchar department_name
+        text department_description
+        timestamp created_at
+    }
+
+    positions {
+        varchar position_id PK
+        varchar department_id FK
+        varchar position_name
+        text position_description
+        timestamp created_at
+    }
+
+    users {
+        varchar user_id PK
+        varchar employee_id FK
+        varchar email
+        varchar password_hash
+        boolean is_active
+        timestamp last_login
+    }
+
+    leave_requests {
+        serial leave_id PK
+        varchar employee_id FK
+        varchar leave_type_id FK
+        date start_date
+        date end_date
+        text reason
+        varchar status
+        timestamp created_at
+    }

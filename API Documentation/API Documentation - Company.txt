@@ -1,0 +1,6 @@
+1) Input all the name of the countries with a SERIAL PRIMARY KEY (beforehand)
+2) Input all the industry name (beforehand)
+3) When someone signs up for their company, take the country and industry input and create a record in country_industry. Then store the specific ci_id in the 'Country' table.
+4) Input top 100 currency name (beforehand)
+5) Record the division, department and unit data and establish the audit log upon modification
+6) 

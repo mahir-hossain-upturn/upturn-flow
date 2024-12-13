@@ -1,0 +1,27 @@
+Attendance Management
+
+1) Site
+a. For all the companies, we add sites / locations of their workplace. Check-in and check-out time is also going to exist for that specific site.
+
+2) Weekly Holiday & Annual Leave Config
+a. We need to assign values for all the days in a week [Sat = 1, Sun = 2, Fri = 7]
+b. HR needs to set the start-day at 7 and end-day at 1 = Weekends, every week.
+c. HR can set the annual holiday list in leave calendar and can edit it from time-to-time
+d. (365 - weekends - annual leave = working day). If a day is NOT working day, don't record attendance. That means, no attendance record is created in the table on these days. 
+
+3) Attendance Status
+a. There are 5 types of status anyone can have if a record is generated.
+- if check-in location = site co-ordinates within a radius of 500 meters and check-in time < site  specific check_in time then 'Present'.
+- if check-in location = site co-ordinates within a radius of 500 meters but check-in time > site  specific check_in time then 'Late'.
+- if check-in time < site  specific check_in time but outside the radius of 500 meter, then 'Wrong Location'.
+- Lastly, if employee does not check-in, use the Employee_ID to see whether he/she is on leave or not. If Current_Date < End Day and Start Day < Current Day, STATUS = On-leave (at 1pm on workdays). Otherwise, put 'Absent'.
+
+
+Leave Management
+
+1) At first, register all the different types of leave of the company at company_leave specific table.
+2) Set an annual quota that restricts users from taking leaves more than the quota under leave type.
+3) Each user will be able to submit a leave request which remains under his 'Request' tab for status and goes to the 'Request' tab of his/her supervisor for approval.
+4) Unless 'Approved' / 'Rejected', the status of the request is going to remain 'Pending' for being the default status.
+5) The user will only be able to submit a LEAVE REQUEST, if the leave balance under the leave_type is > 0, unless show error message. And whenever, a leave request is 'ACCEPTED', a corresponding record is going to be generated in the 'Leave Balance' table with the updated leave balance under that specific type (previous leave balance under the same company, same employee and same leave_type - Duration from the 'Leave Record'). The leave balance counter is RESET on every 1st January, replenishing all the leave balance under each leave type (according to the annual company quota).
+6) Similar to the Leave Balance, another corresponding record is going to be created under the 'Leave Record' table (only when the leave is 'Approved'). 

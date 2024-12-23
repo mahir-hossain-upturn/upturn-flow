@@ -1,0 +1,9 @@
+drop SCHEMA IF EXISTS company cascade;
+drop SCHEMA IF EXISTS administration cascade;
+drop SCHEMA IF EXISTS employee cascade;
+drop SCHEMA IF EXISTS attendance cascade;
+drop SCHEMA IF EXISTS payroll cascade;
+drop SCHEMA IF EXISTS performance cascade;
+drop SCHEMA IF EXISTS project cascade;
+drop SCHEMA IF EXISTS stakeholder cascade;
+drop SCHEMA IF EXISTS "transaction" cascade;

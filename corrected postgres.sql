@@ -1,3 +1,13 @@
+CREATE SCHEMA company;
+CREATE SCHEMA administration;
+CREATE SCHEMA employee;
+CREATE SCHEMA attendance;
+CREATE SCHEMA payroll;
+CREATE SCHEMA performance;
+CREATE SCHEMA project;
+CREATE SCHEMA stakeholder;
+CREATE SCHEMA "transaction";
+
 -- Schema: Company
 CREATE TABLE company.country (
     country_id SERIAL PRIMARY KEY,
@@ -6,7 +16,7 @@ CREATE TABLE company.country (
 
 CREATE TABLE company.industry (
     industry_id SERIAL PRIMARY KEY,
-    industry_name VARCHAR(100) NOT NULL -- did input for all the possible industry for data validation
+    industry_name VARCHAR(100) NOT NULL, -- did input for all the possible industry for data validation
     updated_at TIMESTAMP NOT NULL -- at update
 );
 
@@ -14,11 +24,6 @@ CREATE TABLE company.country_industry ( -- this table works as the input field f
 ci_id SERIAL PRIMARY KEY,
 country INTEGER REFERENCES company.country(country_id) NOT NULL,
 industry INTEGER REFERENCES company.industry(industry_id) NOT NULL
-);
-
-CREATE TABLE company.currency (
-    currency_code VARCHAR(3) PRIMARY KEY,
-	currency_name VARCHAR(25) NOT NULL
 );
 
 CREATE TABLE company.company (
@@ -30,6 +35,39 @@ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 updated_at TIMESTAMP NOT NULL -- at update
 );
 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+CREATE TABLE employee.user (
+    user_id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+	username VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    is_active BOOLEAN DEFAULT FALSE NOT NULL, -- every session lasts for 60 minutes. If no activity for 60 minutes, the account logs out automatically. Account is only active if the tab / app is open last & last activity < 60 mins ago.
+    last_login TIMESTAMP NOT  NULL, -- is used to count session duration
+    has_approval BOOLEAN DEFAULT FALSE NOT NULL -- (to start/stop user usage)
+);
+
+CREATE TABLE employee.employee (
+    employee_id SERIAL PRIMARY KEY,
+	company_id INTEGER REFERENCES company.company(company_id) NOT NULL,
+    employee_id_input VARCHAR(20), -- MIR1238 indicates a specific employee || search functionality can be applied to this.
+	user_id uuid REFERENCES employee.user(user_id) UNIQUE,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    phone_number VARCHAR(20),
+    hire_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
+);
+
+ALTER TABLE employee.user 
+ADD COLUMN employee_id INTEGER REFERENCES employee.employee(employee_id) UNIQUE;
+
+CREATE TABLE company.currency (
+    currency_code VARCHAR(3) PRIMARY KEY,
+	currency_name VARCHAR(25) NOT NULL
+);
+
 CREATE TABLE company.division (
     div_id SERIAL PRIMARY KEY,
     div_name VARCHAR(50) NOT NULL,
@@ -39,7 +77,7 @@ CREATE TABLE company.division (
     company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE company.department (
+CREATE TABLE company.dept (
     dept_id SERIAL PRIMARY KEY,
     dept_name VARCHAR(50) NOT NULL,
     dept_head INTEGER REFERENCES employee.employee(employee_id),
@@ -101,39 +139,13 @@ CREATE TABLE company.address (
     city VARCHAR(20) NOT NULL,
     state VARCHAR(20),
     postal_code VARCHAR(10),
-    country INTEGER REFERENCES company.country(country_id) NOT NULL
+    country INTEGER REFERENCES company.country(country_id) NOT NULL,
     company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
 
 -- Schema: Employee
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
-CREATE TABLE employee.user (
-    user_id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
-	username VARCHAR(50) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    is_active BOOLEAN DEFAULT FALSE NOT NULL, -- every session lasts for 60 minutes. If no activity for 60 minutes, the account logs out automatically. Account is only active if the tab / app is open last & last activity < 60 mins ago.
-    last_login TIMESTAMP NOT  NULL, -- is used to count session duration
-    has_approval BOOLEAN DEFAULT FALSE NOT NULL -- (to start/stop user usage)
-);
-
-CREATE TABLE employee.employee (
-    employee_id SERIAL PRIMARY KEY,
-	company_id INTEGER REFERENCES company.company(company_id) NOT NULL,
-    employee_id_input VARCHAR(20), -- MIR1238 indicates a specific employee || search functionality can be applied to this.
-	user_id uuid REFERENCES employee.user(user_id) UNIQUE,
-    first_name VARCHAR(50) NOT NULL,
-    last_name VARCHAR(50) NOT NULL,
-    phone_number VARCHAR(20),
-    hire_date DATE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL
-);
-
-ALTER TABLE employee.user 
-ADD COLUMN employee_id INTEGER REFERENCES employee.employee(employee_id) UNIQUE;
 
 CREATE TABLE employee.employee_designation (
     ep_id SERIAL PRIMARY KEY,
@@ -164,7 +176,7 @@ CREATE TABLE employee.personal_info (
     blood_group VARCHAR(3), -- provide drop-down from front-end
     CHECK(blood_group IN('A+','B+','O+','AB+','A-','B-','AB-','O-')),
     marital_status VARCHAR(20), -- provide drop-down from front-end
-    CHECK(marital_status IN('Unmarried','Married','Single'))
+    CHECK(marital_status IN('Unmarried','Married','Single')),
     nid_no VARCHAR(25) UNIQUE,
     religion VARCHAR(10), 
 	father_name VARCHAR(50),
@@ -336,7 +348,7 @@ CREATE TABLE project.project_status (
 CREATE TABLE project.project_dept (
 	pdept_id SERIAL PRIMARY KEY,
 	project INTEGER REFERENCES project.project_record(project_id),
-	department INTEGER REFERENCES company.department(dept_id)
+	department INTEGER REFERENCES company.dept(dept_id)
 );
 
 CREATE TABLE project.project_progression (
@@ -517,7 +529,6 @@ CREATE TABLE stakeholder.issue ( -- create issue || resolve issue
 CREATE TABLE stakeholder.auto_invoice ( -- activate only for recurring - is_active - monthly_subscription || ONE RECORD for each automation
 	sai_id SERIAL PRIMARY KEY,
 	stakeholder INTEGER REFERENCES stakeholder.record(stakeholder_id) NOT NULL,
-	stakeholder INTEGER REFERENCES stakeholder.category(category_id) NOT NULL,
 	is_recurring BOOLEAN NOT NULL, -- if recurring put 1, otherwise 0
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP NOT NULL, -- on update
@@ -699,7 +710,7 @@ CREATE TABLE payroll.salary_accumulation ( -- if is_current = FALSE (Fixed + Var
 	psa_id SERIAL PRIMARY KEY,
 	variable_salary INTEGER REFERENCES payroll.employee_v_salary(pevs_id) NOT NULL,
 	fixed_salalry INTEGER REFERENCES payroll.employee_f_salary(pefs_id) NOT NULL,
-	net_balance NOT NULL, -- accumulation of f_salary(l) & v_salary(l) till date
+	net_balance INT NOT NULL, -- accumulation of f_salary(l) & v_salary(l) till date
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP,
 	employee INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
@@ -740,7 +751,7 @@ CREATE TABLE administration.notice_record (
 CREATE TABLE administration.notice_dept ( -- tag the notice to everyone of this dept.
 	nd_id SERIAL PRIMARY KEY,
 	notice_record INTEGER REFERENCES administration.notice_record(nr_id) NOT NULL,
-	department INTEGER REFERENCES company.department(dept_id) NOT NULL,
+	department INTEGER REFERENCES company.dept(dept_id) NOT NULL,
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 

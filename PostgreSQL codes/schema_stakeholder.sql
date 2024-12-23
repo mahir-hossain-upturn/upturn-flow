@@ -1,16 +1,16 @@
-CREATE TABLE stakeholder.type (
+CREATE TABLE IF NOT EXISTS stakeholder.type (
     type_id SERIAL PRIMARY KEY,
     type_name VARCHAR(20) NOT NULL,
     CHECK (type_name IN ('Client', 'Supplier', 'Lead', 'Vendor'))
 );
 
-CREATE TABLE stakeholder.category (
+CREATE TABLE IF NOT EXISTS stakeholder.category (
 	category_id SERIAL PRIMARY KEY,
     category_name VARCHAR(20) NOT NULL,
     CHECK (category_name IN ('Prospective','One-time','Recurring','On-Hold','Discontinued'))
 );
 
-CREATE TABLE stakeholder.record (
+CREATE TABLE IF NOT EXISTS stakeholder.record (
 	stakeholder_id SERIAL PRIMARY KEY,
     stakeholder_type INTEGER REFERENCES stakeholder.type(type_id) NOT NULL,
     category INTEGER REFERENCES stakeholder.category(category_id) NOT NULL,
@@ -29,25 +29,25 @@ CREATE TABLE stakeholder.record (
     updated_at TIMESTAMP NOT NULL -- ON UPDATE
 );
 
-CREATE TABLE stakeholder.interaction_p1 (
+CREATE TABLE IF NOT EXISTS stakeholder.interaction_p1 (
 	ip1_id SERIAL PRIMARY KEY,
 	interaction_type VARCHAR(10) NOT NULL,
 	CHECK(interaction_type IN ('Service','Product','Payment','Lead'))
 );
 
-CREATE TABLE stakeholder.interaction_p2 (
+CREATE TABLE IF NOT EXISTS stakeholder.interaction_p2 (
 	ip2_id SERIAL PRIMARY KEY,
 	interaction_type VARCHAR(10) NOT NULL,
 	CHECK(interaction_type IN ('Give','Receive','Update'))
 );
 
-CREATE TABLE stakeholder.activity_type ( -- Lead can only go with Update, other than that every other combination is possible
+CREATE TABLE IF NOT EXISTS stakeholder.activity_type ( -- Lead can only go with Update, other than that every other combination is possible
 	activity_type_id SERIAL PRIMARY KEY,
 	interaction_p1 INTEGER REFERENCES stakeholder.interaction_p1(ip1_id) NOT NULL,
 	interaction_p2 INTEGER REFERENCES stakeholder.interaction_p2(ip2_id) NOT NULL
 );
 
-CREATE TABLE stakeholder.activity_log ( -- can one activity log reference another previous activity log with log_id as reference key? For example: reference one 'Receive Payment_Client 1' activity log with 'Give Service_Client 1' activity log.
+CREATE TABLE IF NOT EXISTS stakeholder.activity_log ( -- can one activity log reference another previous activity log with log_id as reference key? For example: reference one 'Receive Payment_Client 1' activity log with 'Give Service_Client 1' activity log.
 	log_id SERIAL PRIMARY KEY,
 	activity_type INTEGER REFERENCES stakeholder.activity_type(activity_type_id) NOT NULL,
 	stakeholder INTEGER REFERENCES stakeholder.record(stakeholder_id) NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE stakeholder.activity_log ( -- can one activity log reference anothe
 	updated_at TIMESTAMP
 );
 
-CREATE TABLE stakeholder.issue ( -- create issue || resolve issue
+CREATE TABLE IF NOT EXISTS stakeholder.issue ( -- create issue || resolve issue
 	si_id SERIAL PRIMARY KEY,
 	has_issue BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE stakeholder.issue ( -- create issue || resolve issue
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE stakeholder.auto_invoice ( -- activate only for recurring - is_active - monthly_subscription || ONE RECORD for each automation
+CREATE TABLE IF NOT EXISTS stakeholder.auto_invoice ( -- activate only for recurring - is_active - monthly_subscription || ONE RECORD for each automation
 	sai_id SERIAL PRIMARY KEY,
 	stakeholder INTEGER REFERENCES stakeholder.record(stakeholder_id) NOT NULL,
 	stakeholder INTEGER REFERENCES stakeholder.category(category_id) NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE stakeholder.auto_invoice ( -- activate only for recurring - is_acti
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE stakeholder.transaction (
+CREATE TABLE IF NOT EXISTS stakeholder.transaction (
 	st_id SERIAL PRIMARY KEY,
 	activity_log INTEGER REFERENCES stakeholder.activity_log(log_id) NOT NULL,
 	stakeholder INTEGER REFERENCES stakeholder.record(stakeholder_id) NOT NULL,
@@ -96,7 +96,7 @@ CREATE TABLE stakeholder.transaction (
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE stakeholder.payment_approval(
+CREATE TABLE IF NOT EXISTS stakeholder.payment_approval(
 	p_approval_id SERIAL PRIMARY KEY,
 	payment_log INTEGER REFERENCES stakeholder.transaction(st_id),
 	approval BOOLEAN DEFAULT FALSE, -- true = approved
@@ -104,7 +104,7 @@ CREATE TABLE stakeholder.payment_approval(
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE stakeholder.stakeholder_address (
+CREATE TABLE IF NOT EXISTS stakeholder.stakeholder_address (
 	ssa_id SERIAL PRIMARY KEY,
     stakeholder INTEGER REFERENCES stakeholder.record(stakeholder_id),
     address_id INTEGER REFERENCES company.address(address_id) NOT NULL,

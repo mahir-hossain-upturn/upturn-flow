@@ -1,4 +1,4 @@
-CREATE TABLE payroll.salary_component ( -- this assumes that fixed and gross components remain the same for all employees in the company
+CREATE TABLE IF NOT EXISTS payroll.salary_component ( -- this assumes that fixed and gross components remain the same for all employees in the company
 	psc_id SERIAL PRIMARY KEY,
 	component_name VARCHAR(50) NOT NULL, -- verify with Income Tax Manual
 	CHECK(component_name IN('Basic Salary','Home Rent Allowance','Festival Bonus','Car Maintenance Allowance','Mobile Bill','Entertainment Allowance','Convenyance Allowance','Overtime Pay','Lunch Subsidy','Employee contribution to PF')),
@@ -7,7 +7,7 @@ CREATE TABLE payroll.salary_component ( -- this assumes that fixed and gross com
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE payroll.employee_f_salary (
+CREATE TABLE IF NOT EXISTS payroll.employee_f_salary (
 	pefs_id SERIAL PRIMARY KEY,
 	employee INTEGER REFERENCES employee.employee(employee_id),
 	salary_component INTEGER REFERENCES payroll.salary_component(psc_id),
@@ -21,7 +21,7 @@ CREATE TABLE payroll.employee_f_salary (
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE payroll.employee_v_salary (
+CREATE TABLE IF NOT EXISTS payroll.employee_v_salary (
 	pevs_id SERIAL PRIMARY KEY,
 	employee INTEGER REFERENCES employee.employee(employee_id),
 	salary_component INTEGER REFERENCES payroll.salary_component(psc_id),
@@ -34,7 +34,7 @@ CREATE TABLE payroll.employee_v_salary (
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE payroll.employee_salary_record (
+CREATE TABLE IF NOT EXISTS payroll.employee_salary_record (
 	pesr_id SERIAL PRIMARY KEY,
 	employee INTEGER REFERENCES employee.employee(employee_id),
 	which_month DATE NOT NULL, -- format the month from front-end UI
@@ -48,7 +48,7 @@ CREATE TABLE payroll.employee_salary_record (
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE payroll.disbursement (
+CREATE TABLE IF NOT EXISTS payroll.disbursement (
 	pd_id SERIAL PRIMARY KEY,
 	employee INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
 	salary_record INTEGER REFERENCES payroll.employee_salary_record(pesr_id) NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE payroll.disbursement (
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE payroll.salary_accumulation ( -- if is_current = FALSE (Fixed + Variable), the amount gets accumulated over the years || Automatically creates a record when f & v (l) becomes due
+CREATE TABLE IF NOT EXISTS payroll.salary_accumulation ( -- if is_current = FALSE (Fixed + Variable), the amount gets accumulated over the years || Automatically creates a record when f & v (l) becomes due
 	psa_id SERIAL PRIMARY KEY,
 	variable_salary INTEGER REFERENCES payroll.employee_v_salary(pevs_id) NOT NULL,
 	fixed_salalry INTEGER REFERENCES payroll.employee_f_salary(pefs_id) NOT NULL,

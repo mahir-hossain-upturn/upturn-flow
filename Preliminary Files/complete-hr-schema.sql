@@ -1,5 +1,5 @@
 -- Core Organization Structure
-CREATE TABLE companies (
+CREATE TABLE IF NOT EXISTS companies (
     company_id SERIAL PRIMARY KEY,
     company_name VARCHAR(100) NOT NULL,
     company_code VARCHAR(50) UNIQUE NOT NULL,
@@ -7,41 +7,41 @@ CREATE TABLE companies (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE industries (
+CREATE TABLE IF NOT EXISTS industries (
     industry_id SERIAL PRIMARY KEY,
     industry_name VARCHAR(100) NOT NULL,
     description TEXT
 );
 
-CREATE TABLE company_industry (
+CREATE TABLE IF NOT EXISTS company_industry (
     company_id INTEGER REFERENCES companies(company_id),
     industry_id INTEGER REFERENCES industries(industry_id),
     PRIMARY KEY (company_id, industry_id)
 );
 
-CREATE TABLE country (
+CREATE TABLE IF NOT EXISTS country (
     country_id SERIAL PRIMARY KEY,
     country_name VARCHAR(50)
 );
 
-CREATE TABLE company_country (
+CREATE TABLE IF NOT EXISTS company_country (
     country_id INTEGER REFERENCES country(country_id),
     company_id INTEGER REFERENCES companies(company_id),
     PRIMARY KEY (company_id, country_id)
 );
 
-CREATE TABLE currency (
+CREATE TABLE IF NOT EXISTS currency (
     currency_id SERIAL PRIMARY KEY,
     currency_name VARCHAR(5)
 );
 
-CREATE TABLE divisions (
+CREATE TABLE IF NOT EXISTS divisions (
     division_id SERIAL PRIMARY KEY,
     division_name VARCHAR(25),
     company_id INTEGER REFERENCES companies(company_id)
 );
 
-CREATE TABLE departments (
+CREATE TABLE IF NOT EXISTS departments (
     department_id SERIAL PRIMARY KEY,
     company_id INTEGER REFERENCES companies(company_id),
     department_name VARCHAR(100) NOT NULL,
@@ -51,13 +51,13 @@ CREATE TABLE departments (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE units (
+CREATE TABLE IF NOT EXISTS units (
     unit_id SERIAL PRIMARY KEY,
     unit_name VARCHAR(25),
     department_id INTEGER REFERENCES departments(department_id)
 );
 
-CREATE TABLE positions (
+CREATE TABLE IF NOT EXISTS positions (
     position_id SERIAL PRIMARY KEY,
     department_id INTEGER REFERENCES departments(department_id),
     position_name VARCHAR(100) NOT NULL,
@@ -69,20 +69,20 @@ CREATE TABLE positions (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE company_departments (
+CREATE TABLE IF NOT EXISTS company_departments (
     company_id INTEGER REFERENCES companies(company_id),
     department_id INTEGER REFERENCES departments(department_id),
     PRIMARY KEY (company_id, department_id) 
 );
 
-CREATE TABLE department_positions (
+CREATE TABLE IF NOT EXISTS department_positions (
     department_id INTEGER REFERENCES departments(department_id),
     position_id INTEGER REFERENCES positions(position_id),
     PRIMARY KEY (department_id, position_id)
 );
 
 -- Employee Management
-CREATE TABLE employees (
+CREATE TABLE IF NOT EXISTS employees (
     company_id INTEGER REFERENCES companies(company_id),
     employee_id_input VARCHAR(10),
     employee_id SERIAL PRIMARY KEY,
@@ -95,7 +95,7 @@ CREATE TABLE employees (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE employee_positions (
+CREATE TABLE IF NOT EXISTS employee_positions (
     employee_id INTEGER REFERENCES employees(employee_id),
     position_id INTEGER REFERENCES positions(position_id),
     start_date DATE NOT NULL,
@@ -109,7 +109,7 @@ CREATE TABLE employee_positions (
 );
 
 -- Salary Management
-CREATE TABLE salary_components (
+CREATE TABLE IF NOT EXISTS salary_components (
     component_id SERIAL PRIMARY KEY,
     component_name VARCHAR(100) NOT NULL,
     component_type ENUM('Add','Subtract'),
@@ -122,14 +122,14 @@ INSERT INTO salary_components(component_type) VALUES ('Add');
 INSERT INTO salary_components(component_type) VALUES ('Subtract');
 
 
-CREATE TABLE employee_salary_component (
+CREATE TABLE IF NOT EXISTS employee_salary_component (
     PRIMARY KEY (company_id, employee_id, component_id),
     effective_date DATE NOT NULL,
     end_date DATE,
     payout BOOLEAN
 );
 
-CREATE TABLE fixed_component_records (
+CREATE TABLE IF NOT EXISTS fixed_component_records (
     PRIMARY KEY (company_id, employee_id, component_id),
     created_by INTEGER REFERENCES employees(employee_id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -138,7 +138,7 @@ CREATE TABLE fixed_component_records (
     remark VARCHAR(100)
 );
 
-CREATE TABLE variable_component_records (
+CREATE TABLE IF NOT EXISTS variable_component_records (
     PRIMARY KEY (company_id, employee_id, component_id),
     created_by INTEGER REFERENCES employees(employee_id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -147,19 +147,19 @@ CREATE TABLE variable_component_records (
     remark VARCHAR(100)
 );
 
-CREATE TABLE bank (
+CREATE TABLE IF NOT EXISTS bank (
     bank_id SERIAL PRIMARY KEY,
     bank_name VARCHAR(100)
 );
 
-CREATE TABLE bank_account (
+CREATE TABLE IF NOT EXISTS bank_account (
     PRIMARY KEY (bank_id, employee_id),
     account_name VARCHAR(50),
     account_number INTEGER,
     branch_name VARCHAR(50)
 );
 
-CREATE TABLE payroll_disbursement (
+CREATE TABLE IF NOT EXISTS payroll_disbursement (
     disbursement_id SERIAL PRIMARY KEY,
     employee_id INTEGER REFERENCES employees(employee_id),
     payment_month DATE, -- STORE '2024-03-31' as March 2024
@@ -174,7 +174,7 @@ CREATE TABLE payroll_disbursement (
 INSERT INTO payroll_disbursement(approval_status) VALUES ('Approved');
 INSERT INTO payroll_disbursement(approval_status) VALUES ('Rejected');
 
-CREATE TABLE bank_transaction (
+CREATE TABLE IF NOT EXISTS bank_transaction (
     transaction_id SERIAL PRIMARY KEY,
     disbursement_id INTEGER REFERENCES payroll_disbursement(disbursement_id),
     bank_account_id (bank_id, employee_id),
@@ -183,14 +183,14 @@ CREATE TABLE bank_transaction (
 
 
 -- Claims Management
-CREATE TABLE claim_table (
+CREATE TABLE IF NOT EXISTS claim_table (
     claim_type_id SERIAL PRIMARY KEY,
     claim_type VARCHAR(100) NOT NULL,
     description TEXT,
     company_id INTEGER REFERENCES companies(company_id),
 );
 
-CREATE TABLE claims (
+CREATE TABLE IF NOT EXISTS claims (
     claim_id SERIAL PRIMARY KEY,
     claim_date DATE NOT NULL,
     claimant INTEGER REFERENCES employees(employee_id),
@@ -203,7 +203,7 @@ CREATE TABLE claims (
 );
 
 -- Document Management
-CREATE TABLE document_types (
+CREATE TABLE IF NOT EXISTS document_types (
     type_id VARCHAR(20) PRIMARY KEY,
     type_name VARCHAR(100) NOT NULL,
     description TEXT,
@@ -211,7 +211,7 @@ CREATE TABLE document_types (
     renewal_period_months INTEGER
 );
 
-CREATE TABLE documents (
+CREATE TABLE IF NOT EXISTS documents (
     document_id SERIAL PRIMARY KEY,
     entity_type VARCHAR(50) NOT NULL,
     entity_id VARCHAR(50) NOT NULL,
@@ -225,7 +225,7 @@ CREATE TABLE documents (
 );
 
 -- Audit Trail
-CREATE TABLE audit_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
     audit_id SERIAL PRIMARY KEY,
     table_name VARCHAR(50) NOT NULL,
     record_id UUID NOT NULL,
@@ -238,7 +238,7 @@ CREATE TABLE audit_logs (
 );
 
 -- Employee Personal Information
-CREATE TABLE employee_personal_info (
+CREATE TABLE IF NOT EXISTS employee_personal_info (
     employee_id INTEGER PRIMARY KEY REFERENCES employees(employee_id),
     date_of_birth DATE,
     gender VARCHAR(10),
@@ -252,7 +252,7 @@ CREATE TABLE employee_personal_info (
 );
 
 -- Address Management
-CREATE TABLE addresses (
+CREATE TABLE IF NOT EXISTS addresses (
     address_id SERIAL PRIMARY KEY,
     street_address TEXT NOT NULL,
     city VARCHAR(50),
@@ -262,20 +262,20 @@ CREATE TABLE addresses (
     address_type VARCHAR(20)
 );
 
-CREATE TABLE employee_addresses (
+CREATE TABLE IF NOT EXISTS employee_addresses (
     employee_id INTEGER REFERENCES employees(employee_id),
     address_id INTEGER REFERENCES addresses(address_id),
     PRIMARY KEY (employee_id, address_id)
 );
 
 -- Leave Management
-CREATE TABLE leave_types (
+CREATE TABLE IF NOT EXISTS leave_types (
     leave_type_id SERIAL PRIMARY KEY,
     leave_type_name VARCHAR(50) NOT NULL,
     description TEXT
 );
 
-CREATE TABLE leave_policies (
+CREATE TABLE IF NOT EXISTS leave_policies (
     policy_id SERIAL PRIMARY KEY,
     company_id INTEGER REFERENCES companies(company_id),
     leave_type_id INTEGER REFERENCES leave_types(leave_type_id),
@@ -285,7 +285,7 @@ CREATE TABLE leave_policies (
     max_carry_forward INTEGER DEFAULT 0
 );
 
-CREATE TABLE leave_requests (
+CREATE TABLE IF NOT EXISTS leave_requests (
     leave_id SERIAL PRIMARY KEY,
     employee_id INTEGER REFERENCES employees(employee_id),
     leave_type_id INTEGER REFERENCES leave_types(leave_type_id),
@@ -298,7 +298,7 @@ CREATE TABLE leave_requests (
 );
 
 -- Attendance Management
-CREATE TABLE site_locations (
+CREATE TABLE IF NOT EXISTS site_locations (
     location_id SERIAL PRIMARY KEY,
     company_id INTEGER REFERENCES companies(company_id),
     location_name VARCHAR(100) NOT NULL,
@@ -307,7 +307,7 @@ CREATE TABLE site_locations (
     check_out TIMESTAMP
 );
 
-CREATE TABLE attendance_records (
+CREATE TABLE IF NOT EXISTS attendance_records (
     attendance_id SERIAL PRIMARY KEY,
     employee_id INTEGER REFERENCES employees(employee_id),
     attendance_date DATE NOT NULL,
@@ -322,13 +322,13 @@ CREATE TABLE attendance_records (
 );
 
 -- Performance Management
-CREATE TABLE kpi_categories (
+CREATE TABLE IF NOT EXISTS kpi_categories (
     category_id SERIAL PRIMARY KEY,
     category_name VARCHAR(100) NOT NULL,
     description TEXT
 );
 
-CREATE TABLE kpis (
+CREATE TABLE IF NOT EXISTS kpis (
     kpi_id VARCHAR(20) PRIMARY KEY,
     category_id VARCHAR(10) REFERENCES kpi_categories(category_id),
     position_id INTEGER REFERENCES positions(position_id),
@@ -339,7 +339,7 @@ CREATE TABLE kpis (
     weight INTEGER
 );
 
-CREATE TABLE performance_reviews (
+CREATE TABLE IF NOT EXISTS performance_reviews (
     review_id SERIAL PRIMARY KEY,
     employee_id INTEGER REFERENCES employees(employee_id),
     reviewer_id INTEGER REFERENCES employees(employee_id),
@@ -352,7 +352,7 @@ CREATE TABLE performance_reviews (
     CONSTRAINT valid_review_status CHECK (status IN ('DRAFT', 'SUBMITTED', 'APPROVED'))
 );
 
-CREATE TABLE performance_review_details (
+CREATE TABLE IF NOT EXISTS performance_review_details (
     review_id INTEGER REFERENCES performance_reviews(review_id),
     kpi_id VARCHAR(20) REFERENCES kpis(kpi_id),
     score DECIMAL(5,2) NOT NULL,
@@ -361,7 +361,7 @@ CREATE TABLE performance_review_details (
 );
 
 -- User Authentication and Authorization
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id VARCHAR(20) PRIMARY KEY,
     employee_id INTEGER UNIQUE REFERENCES employees(employee_id),
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -370,46 +370,46 @@ CREATE TABLE users (
     last_login TIMESTAMP
 );
 
-CREATE TABLE roles (
+CREATE TABLE IF NOT EXISTS roles (
     role_id VARCHAR(10) PRIMARY KEY,
     role_name VARCHAR(50) NOT NULL,
     description TEXT
 );
 
-CREATE TABLE permissions (
+CREATE TABLE IF NOT EXISTS permissions (
     permission_id VARCHAR(20) PRIMARY KEY,
     permission_name VARCHAR(100) NOT NULL,
     description TEXT
 );
 
-CREATE TABLE role_permissions (
+CREATE TABLE IF NOT EXISTS role_permissions (
     role_id VARCHAR(10) REFERENCES roles(role_id),
     permission_id VARCHAR(20) REFERENCES permissions(permission_id),
     PRIMARY KEY (role_id, permission_id)
 );
 
-CREATE TABLE user_roles (
+CREATE TABLE IF NOT EXISTS user_roles (
     user_id VARCHAR(20) REFERENCES users(user_id),
     role_id VARCHAR(10) REFERENCES roles(role_id),
     PRIMARY KEY (user_id, role_id)
 );
 
 -- Stakeholder Management
-CREATE TABLE stakeholder_types (
+CREATE TABLE IF NOT EXISTS stakeholder_types (
     type_id SERIAL PRIMARY KEY,
     type_name VARCHAR(50) NOT NULL,
     description TEXT,
     CONSTRAINT valid_stakeholder_type CHECK (type_name IN ('Client', 'Supplier', 'Lead', 'Vendor'))
 );
 
-CREATE TABLE stakeholder_categories (
+CREATE TABLE IF NOT EXISTS stakeholder_categories (
     category_id SERIAL PRIMARY KEY,
     category_name VARCHAR(50) NOT NULL,
     description TEXT,
     CONSTRAINT valid_category CHECK (category_name IN ('One-time', 'Ongoing', 'Recurring'))
 );
 
-CREATE TABLE stakeholders (
+CREATE TABLE IF NOT EXISTS stakeholders (
     stakeholder_id SERIAL PRIMARY KEY,
     stakeholder_type_id INTEGER REFERENCES stakeholder_types(type_id),
     category_id INTEGER REFERENCES stakeholder_categories(category_id),
@@ -425,7 +425,7 @@ CREATE TABLE stakeholders (
 );
 
 -- Project Management
-CREATE TABLE projects (
+CREATE TABLE IF NOT EXISTS projects (
     project_id SERIAL PRIMARY KEY,
     project_title VARCHAR(200) NOT NULL,
     project_lead INTEGER REFERENCES employees(employee_id),
@@ -438,7 +438,7 @@ CREATE TABLE projects (
     CONSTRAINT valid_project_status CHECK (status IN ('PLANNED', 'IN_PROGRESS', 'ON_HOLD', 'COMPLETED', 'CANCELLED'))
 );
 
-CREATE TABLE milestones (
+CREATE TABLE IF NOT EXISTS milestones (
     milestone_id SERIAL PRIMARY KEY,
     project_id INTEGER REFERENCES projects(project_id),
     title VARCHAR(100) NOT NULL,
@@ -451,7 +451,7 @@ CREATE TABLE milestones (
     CONSTRAINT valid_milestone_status CHECK (status IN ('NOT_STARTED', 'IN_PROGRESS', 'ACHIEVED', 'NOT_ACHIEVED'))
 );
 
-CREATE TABLE tasks (
+CREATE TABLE IF NOT EXISTS tasks (
     task_id SERIAL PRIMARY KEY,
     project_id INTEGER REFERENCES projects(project_id),
     milestone_id INTEGER REFERENCES milestones(milestone_id),
@@ -465,27 +465,27 @@ CREATE TABLE tasks (
     CONSTRAINT valid_priority CHECK (priority IN ('LOW', 'MEDIUM', 'HIGH'))
 );
 
-CREATE TABLE task_assignments (
+CREATE TABLE IF NOT EXISTS task_assignments (
     task_id INTEGER REFERENCES tasks(task_id),
     employee_id INTEGER REFERENCES employees(employee_id),
     PRIMARY KEY (task_id, employee_id)
 );
 
-CREATE TABLE milestone_assignments (
+CREATE TABLE IF NOT EXISTS milestone_assignments (
     milestone_id INTEGER REFERENCES milestones(milestone_id),
     department_id INTEGER REFERENCES departments(department_id),
     PRIMARY KEY (milestone_id, department_id)
 );
 
 -- Activity Logging
-CREATE TABLE activity_types (
+CREATE TABLE IF NOT EXISTS activity_types (
     type_id SERIAL PRIMARY KEY,
     type_name VARCHAR(50) NOT NULL,
     description TEXT,
     CONSTRAINT valid_activity_type CHECK (type_name IN ('Service Interaction', 'Product Interaction', 'Payment Interaction', 'Lead Interaction'))
 );
 
-CREATE TABLE activity_logs (
+CREATE TABLE IF NOT EXISTS activity_logs (
     activity_id SERIAL PRIMARY KEY,
     stakeholder_id INTEGER REFERENCES stakeholders(stakeholder_id),
     activity_type_id INTEGER REFERENCES activity_types(type_id),
@@ -499,14 +499,14 @@ CREATE TABLE activity_logs (
 );
 
 -- Notice Board Management
-CREATE TABLE notice_types (
+CREATE TABLE IF NOT EXISTS notice_types (
     type_id SERIAL PRIMARY KEY,
     type_name VARCHAR(50) NOT NULL,
     description TEXT,
     CONSTRAINT valid_notice_type CHECK (type_name IN ('General Announcement', 'HR Update', 'Administrative Notice', 'Event', 'Policy Update', 'Training/Workshop'))
 );
 
-CREATE TABLE notices (
+CREATE TABLE IF NOT EXISTS notices (
     notice_id SERIAL PRIMARY KEY,
     notice_type_id INTEGER REFERENCES notice_types(type_id),
     title VARCHAR(200) NOT NULL,
@@ -522,7 +522,7 @@ CREATE TABLE notices (
 );
 
 -- Complaint Management
-CREATE TABLE complaint_types (
+CREATE TABLE IF NOT EXISTS complaint_types (
     type_id SERIAL PRIMARY KEY,
     type_name VARCHAR(100) NOT NULL,
     definition TEXT,
@@ -530,7 +530,7 @@ CREATE TABLE complaint_types (
     CONSTRAINT valid_complaint_type CHECK (type_name IN ('Discrimination', 'Bullying', 'Harassment', 'Work Conditions', 'Workplace health & safety', 'Management', 'Work environment', 'Interpersonal Conflicts', 'Retaliation', 'Verbal abuse', 'Workload grievances', 'Workplace violence', 'Others'))
 );
 
-CREATE TABLE complaints (
+CREATE TABLE IF NOT EXISTS complaints (
     complaint_id VARCHAR(20) PRIMARY KEY,
     complaint_type_id VARCHAR(10) REFERENCES complaint_types(type_id),
     complainant_id INTEGER REFERENCES employees(employee_id),
@@ -542,7 +542,7 @@ CREATE TABLE complaints (
     CONSTRAINT valid_complaint_status CHECK (status IN ('NOT_STARTED', 'PENDING', 'RESOLVED'))
 );
 
-CREATE TABLE complaint_followups (
+CREATE TABLE IF NOT EXISTS complaint_followups (
     followup_id SERIAL PRIMARY KEY,
     complaint_id VARCHAR(20) REFERENCES complaints(complaint_id),
     followup_text TEXT,
@@ -552,7 +552,7 @@ CREATE TABLE complaint_followups (
 );
 
 -- Package Management
-CREATE TABLE package_types (
+CREATE TABLE IF NOT EXISTS package_types (
     pack_id VARCHAR(10) PRIMARY KEY,
     pack_name VARCHAR(50) NOT NULL,
     user_limit INTEGER,
@@ -560,7 +560,7 @@ CREATE TABLE package_types (
     description TEXT
 );
 
-CREATE TABLE package_features (
+CREATE TABLE IF NOT EXISTS package_features (
     pack_id VARCHAR(10) REFERENCES package_types(pack_id),
     feature_name VARCHAR(50) NOT NULL,
     is_enabled BOOLEAN DEFAULT false,
@@ -568,7 +568,7 @@ CREATE TABLE package_features (
     CONSTRAINT valid_feature CHECK (feature_name IN ('HRIS', 'Admin_Mgt', 'Project_Mgt', 'Stakeholder_Mgt', 'Report', 'Process_Mgt', 'Performance_Mgt'))
 );
 
-CREATE TABLE company_packages (
+CREATE TABLE IF NOT EXISTS company_packages (
     company_id INTEGER REFERENCES companies(company_id),
     pack_id VARCHAR(10) REFERENCES package_types(pack_id),
     start_date DATE NOT NULL,

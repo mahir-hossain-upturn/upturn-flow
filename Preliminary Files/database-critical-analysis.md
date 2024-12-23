@@ -65,7 +65,7 @@
 ### Immediate Actions
 1. Add Salary Management:
 ```sql
-CREATE TABLE salary_records (
+CREATE TABLE IF NOT EXISTS salary_records (
     salary_id SERIAL PRIMARY KEY,
     employee_id VARCHAR(20) REFERENCES employees(employee_id),
     effective_date DATE NOT NULL,
@@ -79,7 +79,7 @@ CREATE TABLE salary_records (
 
 2. Add Document Management:
 ```sql
-CREATE TABLE documents (
+CREATE TABLE IF NOT EXISTS documents (
     document_id SERIAL PRIMARY KEY,
     entity_type VARCHAR(50) NOT NULL, -- 'EMPLOYEE', 'CONTRACT', 'POLICY'
     entity_id VARCHAR(50) NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE documents (
 
 3. Add Audit Trail:
 ```sql
-CREATE TABLE audit_logs (
+CREATE TABLE IF NOT EXISTS audit_logs (
     audit_id SERIAL PRIMARY KEY,
     table_name VARCHAR(50) NOT NULL,
     record_id VARCHAR(50) NOT NULL,

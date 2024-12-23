@@ -1,5 +1,5 @@
 -- Core Organization Structure
-CREATE TABLE companies (
+CREATE TABLE IF NOT EXISTS companies (
     company_id VARCHAR(10) PRIMARY KEY,
     company_name VARCHAR(100) NOT NULL,
     company_code VARCHAR(50) UNIQUE NOT NULL,
@@ -7,19 +7,19 @@ CREATE TABLE companies (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE industries (
+CREATE TABLE IF NOT EXISTS industries (
     industry_id VARCHAR(10) PRIMARY KEY,
     industry_name VARCHAR(100) NOT NULL,
     description TEXT
 );
 
-CREATE TABLE company_industry (
+CREATE TABLE IF NOT EXISTS company_industry (
     company_id VARCHAR(10) REFERENCES companies(company_id),
     industry_id VARCHAR(10) REFERENCES industries(industry_id),
     PRIMARY KEY (company_id, industry_id)
 );
 
-CREATE TABLE departments (
+CREATE TABLE IF NOT EXISTS departments (
     department_id VARCHAR(20) PRIMARY KEY,
     company_id VARCHAR(10) REFERENCES companies(company_id),
     department_name VARCHAR(100) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE departments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE positions (
+CREATE TABLE IF NOT EXISTS positions (
     position_id VARCHAR(20) PRIMARY KEY,
     department_id VARCHAR(20) REFERENCES departments(department_id),
     position_name VARCHAR(100) NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE positions (
 );
 
 -- Employee Management
-CREATE TABLE employees (
+CREATE TABLE IF NOT EXISTS employees (
     employee_id VARCHAR(20) PRIMARY KEY,
     company_id VARCHAR(10) REFERENCES companies(company_id),
     first_name VARCHAR(50) NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE employees (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE employee_positions (
+CREATE TABLE IF NOT EXISTS employee_positions (
     employee_id VARCHAR(20) REFERENCES employees(employee_id),
     position_id VARCHAR(20) REFERENCES positions(position_id),
     start_date DATE NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE employee_positions (
     PRIMARY KEY (employee_id, position_id, start_date)
 );
 
-CREATE TABLE employee_personal_info (
+CREATE TABLE IF NOT EXISTS employee_personal_info (
     employee_id VARCHAR(20) PRIMARY KEY REFERENCES employees(employee_id),
     date_of_birth DATE,
     gender VARCHAR(10),
@@ -70,7 +70,7 @@ CREATE TABLE employee_personal_info (
 );
 
 -- Address Management
-CREATE TABLE addresses (
+CREATE TABLE IF NOT EXISTS addresses (
     address_id SERIAL PRIMARY KEY,
     street_address TEXT NOT NULL,
     city VARCHAR(100),
@@ -80,7 +80,7 @@ CREATE TABLE addresses (
     address_type VARCHAR(20) -- 'PRESENT', 'PERMANENT', 'OFFICE'
 );
 
-CREATE TABLE employee_addresses (
+CREATE TABLE IF NOT EXISTS employee_addresses (
     employee_id VARCHAR(20) REFERENCES employees(employee_id),
     address_id INTEGER REFERENCES addresses(address_id),
     address_type VARCHAR(20) NOT NULL,
@@ -88,13 +88,13 @@ CREATE TABLE employee_addresses (
 );
 
 -- Leave Management
-CREATE TABLE leave_types (
+CREATE TABLE IF NOT EXISTS leave_types (
     leave_type_id VARCHAR(10) PRIMARY KEY,
     leave_type_name VARCHAR(50) NOT NULL,
     description TEXT
 );
 
-CREATE TABLE leave_policies (
+CREATE TABLE IF NOT EXISTS leave_policies (
     policy_id VARCHAR(10) PRIMARY KEY,
     company_id VARCHAR(10) REFERENCES companies(company_id),
     leave_type_id VARCHAR(10) REFERENCES leave_types(leave_type_id),
@@ -103,7 +103,7 @@ CREATE TABLE leave_policies (
     max_carry_forward INTEGER DEFAULT 0
 );
 
-CREATE TABLE leave_requests (
+CREATE TABLE IF NOT EXISTS leave_requests (
     leave_id SERIAL PRIMARY KEY,
     employee_id VARCHAR(20) REFERENCES employees(employee_id),
     leave_type_id VARCHAR(10) REFERENCES leave_types(leave_type_id),
@@ -115,7 +115,7 @@ CREATE TABLE leave_requests (
 );
 
 -- Attendance Management
-CREATE TABLE site_locations (
+CREATE TABLE IF NOT EXISTS site_locations (
     location_id VARCHAR(20) PRIMARY KEY,
     company_id VARCHAR(10) REFERENCES companies(company_id),
     location_name VARCHAR(100) NOT NULL,
@@ -123,7 +123,7 @@ CREATE TABLE site_locations (
     address_id INTEGER REFERENCES addresses(address_id)
 );
 
-CREATE TABLE work_shifts (
+CREATE TABLE IF NOT EXISTS work_shifts (
     shift_id VARCHAR(10) PRIMARY KEY,
     company_id VARCHAR(10) REFERENCES companies(company_id),
     shift_name VARCHAR(50) NOT NULL,
@@ -131,7 +131,7 @@ CREATE TABLE work_shifts (
     end_time TIME NOT NULL
 );
 
-CREATE TABLE attendance_records (
+CREATE TABLE IF NOT EXISTS attendance_records (
     attendance_id SERIAL PRIMARY KEY,
     employee_id VARCHAR(20) REFERENCES employees(employee_id),
     attendance_date DATE NOT NULL,
@@ -145,13 +145,13 @@ CREATE TABLE attendance_records (
 );
 
 -- Performance Management
-CREATE TABLE kpi_categories (
+CREATE TABLE IF NOT EXISTS kpi_categories (
     category_id VARCHAR(10) PRIMARY KEY,
     category_name VARCHAR(100) NOT NULL,
     description TEXT
 );
 
-CREATE TABLE kpis (
+CREATE TABLE IF NOT EXISTS kpis (
     kpi_id VARCHAR(20) PRIMARY KEY,
     category_id VARCHAR(10) REFERENCES kpi_categories(category_id),
     position_id VARCHAR(20) REFERENCES positions(position_id),
@@ -162,7 +162,7 @@ CREATE TABLE kpis (
     weight INTEGER
 );
 
-CREATE TABLE performance_reviews (
+CREATE TABLE IF NOT EXISTS performance_reviews (
     review_id SERIAL PRIMARY KEY,
     employee_id VARCHAR(20) REFERENCES employees(employee_id),
     reviewer_id VARCHAR(20) REFERENCES employees(employee_id),
@@ -173,7 +173,7 @@ CREATE TABLE performance_reviews (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE performance_review_details (
+CREATE TABLE IF NOT EXISTS performance_review_details (
     review_id INTEGER REFERENCES performance_reviews(review_id),
     kpi_id VARCHAR(20) REFERENCES kpis(kpi_id),
     score DECIMAL(5,2) NOT NULL,
@@ -182,13 +182,13 @@ CREATE TABLE performance_review_details (
 );
 
 -- Stakeholder Management
-CREATE TABLE stakeholder_categories (
+CREATE TABLE IF NOT EXISTS stakeholder_categories (
     category_id VARCHAR(10) PRIMARY KEY,
     category_name VARCHAR(50) NOT NULL,
     description TEXT
 );
 
-CREATE TABLE stakeholders (
+CREATE TABLE IF NOT EXISTS stakeholders (
     stakeholder_id VARCHAR(20) PRIMARY KEY,
     company_id VARCHAR(10) REFERENCES companies(company_id),
     category_id VARCHAR(10) REFERENCES stakeholder_categories(category_id),
@@ -199,7 +199,7 @@ CREATE TABLE stakeholders (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE contracts (
+CREATE TABLE IF NOT EXISTS contracts (
     contract_id VARCHAR(20) PRIMARY KEY,
     stakeholder_id VARCHAR(20) REFERENCES stakeholders(stakeholder_id),
     start_date DATE NOT NULL,
@@ -211,7 +211,7 @@ CREATE TABLE contracts (
 );
 
 -- User Authentication and Authorization
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id VARCHAR(20) PRIMARY KEY,
     employee_id VARCHAR(20) UNIQUE REFERENCES employees(employee_id),
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -220,25 +220,25 @@ CREATE TABLE users (
     last_login TIMESTAMP
 );
 
-CREATE TABLE roles (
+CREATE TABLE IF NOT EXISTS roles (
     role_id VARCHAR(10) PRIMARY KEY,
     role_name VARCHAR(50) NOT NULL,
     description TEXT
 );
 
-CREATE TABLE permissions (
+CREATE TABLE IF NOT EXISTS permissions (
     permission_id VARCHAR(20) PRIMARY KEY,
     permission_name VARCHAR(100) NOT NULL,
     description TEXT
 );
 
-CREATE TABLE role_permissions (
+CREATE TABLE IF NOT EXISTS role_permissions (
     role_id VARCHAR(10) REFERENCES roles(role_id),
     permission_id VARCHAR(20) REFERENCES permissions(permission_id),
     PRIMARY KEY (role_id, permission_id)
 );
 
-CREATE TABLE user_roles (
+CREATE TABLE IF NOT EXISTS user_roles (
     user_id VARCHAR(20) REFERENCES users(user_id),
     role_id VARCHAR(10) REFERENCES roles(role_id),
     PRIMARY KEY (user_id, role_id)

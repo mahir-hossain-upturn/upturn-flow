@@ -76,7 +76,7 @@
 
 1. Add Project Management Module:
 ```sql
-CREATE TABLE projects (
+CREATE TABLE IF NOT EXISTS projects (
     project_id VARCHAR(20) PRIMARY KEY,
     project_title VARCHAR(100) NOT NULL,
     project_lead VARCHAR(20) REFERENCES employees(employee_id),
@@ -84,7 +84,7 @@ CREATE TABLE projects (
     end_date DATE
 );
 
-CREATE TABLE milestones (
+CREATE TABLE IF NOT EXISTS milestones (
     milestone_id VARCHAR(20) PRIMARY KEY,
     project_id VARCHAR(20) REFERENCES projects(project_id),
     title VARCHAR(100) NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE milestones (
 
 2. Add Stakeholder Management:
 ```sql
-CREATE TABLE stakeholders (
+CREATE TABLE IF NOT EXISTS stakeholders (
     stakeholder_id VARCHAR(20) PRIMARY KEY,
     stakeholder_type VARCHAR(50) NOT NULL,
     name VARCHAR(100) NOT NULL,
@@ -106,14 +106,14 @@ CREATE TABLE stakeholders (
 
 3. Add Inventory Management:
 ```sql
-CREATE TABLE items (
+CREATE TABLE IF NOT EXISTS items (
     item_id VARCHAR(20) PRIMARY KEY,
     item_name VARCHAR(100) NOT NULL,
     allocated_quantity INTEGER,
     available_quantity INTEGER
 );
 
-CREATE TABLE item_transactions (
+CREATE TABLE IF NOT EXISTS item_transactions (
     transaction_id SERIAL PRIMARY KEY,
     item_id VARCHAR(20) REFERENCES items(item_id),
     transaction_type VARCHAR(20),
@@ -124,7 +124,7 @@ CREATE TABLE item_transactions (
 
 4. Add Package Management:
 ```sql
-CREATE TABLE packages (
+CREATE TABLE IF NOT EXISTS packages (
     package_id VARCHAR(10) PRIMARY KEY,
     package_name VARCHAR(50) NOT NULL,
     user_limit INTEGER,

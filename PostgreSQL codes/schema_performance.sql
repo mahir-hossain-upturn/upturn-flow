@@ -1,4 +1,4 @@
-CREATE TABLE performance.evaluation_type (
+CREATE TABLE IF NOT EXISTS performance.evaluation_type (
 	pet_id SERIAL PRIMARY KEY,
 	evaluation_type VARCHAR(50) NOT NULL,
 	CHECK(evaluation_type IN('Supervisor Feedback','Peer-to-peer Feedback','Project-based Feedback')),
@@ -7,13 +7,13 @@ CREATE TABLE performance.evaluation_type (
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE performance.evaluation_metric (
+CREATE TABLE IF NOT EXISTS performance.evaluation_metric (
 	pem_id SERIAL PRIMARY KEY,
 	metric VARCHAR(50) NOT NULL,
 	CHECK(metric IN('Job Knowledge and Expertise','Quality of Work','Productivity and Efficiency','Communication Skills','Problem-Solving and Innovation','Teamwork and Collaboration','Adaptability and Flexibility','Reliability and Accountability','Goal Completion','Commitment to Growth and Learning'))
 );
 
-CREATE TABLE performance.supervisor_rating ( -- when 'Supervisor Feedback' is chosen || only possible when HR opens the portal
+CREATE TABLE IF NOT EXISTS performance.supervisor_rating ( -- when 'Supervisor Feedback' is chosen || only possible when HR opens the portal
 	psr_id SERIAL PRIMARY KEY,
 	rater INTEGER REFERENCES employee.supervisor(supervisor_id) NOT NULL, -- check whether supervisor or not
 	ratee INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE performance.supervisor_rating ( -- when 'Supervisor Feedback' is ch
 	areas_to_improve TEXT
 );
 
-CREATE TABLE performance.peer_rating ( -- when 'Peer-to-peer Feedback' is chosen || only possible when HR opens the portal
+CREATE TABLE IF NOT EXISTS performance.peer_rating ( -- when 'Peer-to-peer Feedback' is chosen || only possible when HR opens the portal
 	peer_id SERIAL PRIMARY KEY,
 	rater INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
 	ratee INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE performance.peer_rating ( -- when 'Peer-to-peer Feedback' is chosen
 	areas_to_improve TEXT
 );
 
-CREATE TABLE performance.project_rating ( -- when 'Project Feedback' is chosen || only possible when HR opens the portal
+CREATE TABLE IF NOT EXISTS performance.project_rating ( -- when 'Project Feedback' is chosen || only possible when HR opens the portal
 	ppr_id SERIAL PRIMARY KEY,
 	rater INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
 	ratee INTEGER REFERENCES employee.employee(employee_id) NOT NULL,

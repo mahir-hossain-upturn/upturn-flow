@@ -9,24 +9,24 @@ CREATE SCHEMA stakeholder;
 CREATE SCHEMA "transaction";
 
 -- Schema: Company
-CREATE TABLE company.country (
+CREATE TABLE IF NOT EXISTS company.country (
     country_id SERIAL PRIMARY KEY,
     country_name VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE company.industry (
+CREATE TABLE IF NOT EXISTS company.industry (
     industry_id SERIAL PRIMARY KEY,
     industry_name VARCHAR(100) NOT NULL, -- did input for all the possible industry for data validation
     updated_at TIMESTAMP NOT NULL -- at update
 );
 
-CREATE TABLE company.country_industry ( -- this table works as the input field for country & industry when a company registers
+CREATE TABLE IF NOT EXISTS company.country_industry ( -- this table works as the input field for country & industry when a company registers
 ci_id SERIAL PRIMARY KEY,
 country INTEGER REFERENCES company.country(country_id) NOT NULL,
 industry INTEGER REFERENCES company.industry(industry_id) NOT NULL
 );
 
-CREATE TABLE company.company (
+CREATE TABLE IF NOT EXISTS company.company (
 company_id SERIAL PRIMARY KEY NOT NULL,
 company_name VARCHAR(100) NOT NULL,
 company_code VARCHAR(50) UNIQUE NOT NULL, -- data validation required to ask for more than 8 characters, 1 uc, 1lc, 1 special
@@ -37,7 +37,7 @@ updated_at TIMESTAMP NOT NULL -- at update
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE employee.user (
+CREATE TABLE IF NOT EXISTS employee.user (
     user_id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
 	username VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE employee.user (
     has_approval BOOLEAN DEFAULT FALSE NOT NULL -- (to start/stop user usage)
 );
 
-CREATE TABLE employee.employee (
+CREATE TABLE IF NOT EXISTS employee.employee (
     employee_id SERIAL PRIMARY KEY,
 	company_id INTEGER REFERENCES company.company(company_id) NOT NULL,
     employee_id_input VARCHAR(20), -- MIR1238 indicates a specific employee || search functionality can be applied to this.
@@ -63,12 +63,12 @@ CREATE TABLE employee.employee (
 ALTER TABLE employee.user 
 ADD COLUMN employee_id INTEGER REFERENCES employee.employee(employee_id) UNIQUE;
 
-CREATE TABLE company.currency (
+CREATE TABLE IF NOT EXISTS company.currency (
     currency_code VARCHAR(3) PRIMARY KEY,
 	currency_name VARCHAR(25) NOT NULL
 );
 
-CREATE TABLE company.division (
+CREATE TABLE IF NOT EXISTS company.division (
     div_id SERIAL PRIMARY KEY,
     div_name VARCHAR(50) NOT NULL,
     div_head INTEGER REFERENCES employee.employee(employee_id),
@@ -77,7 +77,7 @@ CREATE TABLE company.division (
     company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE company.dept (
+CREATE TABLE IF NOT EXISTS company.dept (
     dept_id SERIAL PRIMARY KEY,
     dept_name VARCHAR(50) NOT NULL,
     dept_head INTEGER REFERENCES employee.employee(employee_id),
@@ -87,7 +87,7 @@ CREATE TABLE company.dept (
 	updated_at TIMESTAMP NOT NULL -- at update
 );
 
-CREATE TABLE company.unit (
+CREATE TABLE IF NOT EXISTS company.unit (
     unit_id SERIAL PRIMARY KEY,
     unit_name VARCHAR(50) NOT NULL,
     unit_head INTEGER REFERENCES employee.employee(employee_id),
@@ -96,7 +96,7 @@ CREATE TABLE company.unit (
 	updated_at TIMESTAMP NOT NULL -- at update
 );
 
-CREATE TABLE company.position (
+CREATE TABLE IF NOT EXISTS company.position (
     position_id SERIAL PRIMARY KEY,
     position_name VARCHAR(50) NOT NULL,
     position_jd TEXT,
@@ -108,7 +108,7 @@ CREATE TABLE company.position (
     updated_at TIMESTAMP NOT NULL -- at update
 );
 
-CREATE TABLE company.designation (
+CREATE TABLE IF NOT EXISTS company.designation (
     desig_id SERIAL PRIMARY KEY,
     company INTEGER REFERENCES company.company(company_id) NOT NULL,
     division INTEGER REFERENCES company.division(div_id),
@@ -119,7 +119,7 @@ CREATE TABLE company.designation (
     updated_at TIMESTAMP NOT NULL -- at update
 );
 
-CREATE TABLE company.role (
+CREATE TABLE IF NOT EXISTS company.role (
     role_id SERIAL PRIMARY KEY,
     role_name VARCHAR(50) NOT NULL,
     CHECK(role_name IN('Super Admin','Admin','HR','Supervisor','End User')),
@@ -131,7 +131,7 @@ CREATE TABLE company.role (
 );
 
 
-CREATE TABLE company.address ( 
+CREATE TABLE IF NOT EXISTS company.address ( 
     address_id SERIAL PRIMARY KEY,
     address_type VARCHAR(20) NOT NULL,
     CHECK(address_type IN('Employee','Client','Supplier','Vendor','Lead')),
@@ -147,7 +147,7 @@ CREATE TABLE company.address (
 -- Schema: Employee
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE employee.employee_designation (
+CREATE TABLE IF NOT EXISTS employee.employee_designation (
     ep_id SERIAL PRIMARY KEY,
 	employee_id INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
     designation INTEGER REFERENCES company.designation(desig_id), -- div, dept, unit & position can be traced with Join
@@ -159,7 +159,7 @@ CREATE TABLE employee.employee_designation (
     company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE employee.employee_address (
+CREATE TABLE IF NOT EXISTS employee.employee_address (
 	eea_id SERIAL PRIMARY KEY,
     employee_id INTEGER REFERENCES employee.employee(employee_id),
     address_id INTEGER REFERENCES company.address(address_id) NOT NULL,
@@ -168,7 +168,7 @@ CREATE TABLE employee.employee_address (
     updated_at TIMESTAMP NOT NULL
 );
 
-CREATE TABLE employee.personal_info (
+CREATE TABLE IF NOT EXISTS employee.personal_info (
     employee_id INTEGER REFERENCES employee.employee(employee_id) PRIMARY KEY,
     date_of_birth DATE,
     gender VARCHAR(10), -- provide drop-down from front-end
@@ -188,13 +188,13 @@ CREATE TABLE employee.personal_info (
     company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE employee.qualification_type ( -- for the time being, just create the table and not link it with anything else
+CREATE TABLE IF NOT EXISTS employee.qualification_type ( -- for the time being, just create the table and not link it with anything else
 eet_id SERIAL PRIMARY KEY,
 type_name VARCHAR(10) NOT NULL,
 CHECK(type_name IN('Training','Specialization','Schooling','Project','Publication'))
 );
 
-CREATE TABLE employee.schooling (
+CREATE TABLE IF NOT EXISTS employee.schooling (
     edu_id SERIAL PRIMARY KEY,
     degree_type VARCHAR(50) NOT NULL, -- provide drop-down from front-end
     CHECK(degree_type IN('High School','College','Diploma','Bachelors','Masters','PGD','PhD','Post-Doc')),
@@ -207,7 +207,7 @@ CREATE TABLE employee.schooling (
     company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE employee.experience (
+CREATE TABLE IF NOT EXISTS employee.experience (
     exp_id SERIAL PRIMARY KEY,
     company_name VARCHAR(50) NOT NULL,
     designation VARCHAR(25) NOT NULL,
@@ -218,14 +218,14 @@ CREATE TABLE employee.experience (
     company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE employee.supervisor ( -- assigning who are supervisors
+CREATE TABLE IF NOT EXISTS employee.supervisor ( -- assigning who are supervisors
 	supervisor_id SERIAL PRIMARY KEY,
 	supervisor INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
 	is_supervisor BOOLEAN DEFAULT TRUE NOT NULL,
 	company_id INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE employee.supervisor_employee ( -- assigning employees to supervisors
+CREATE TABLE IF NOT EXISTS employee.supervisor_employee ( -- assigning employees to supervisors
 	es_id SERIAL PRIMARY KEY,
 	supervisor_id INTEGER REFERENCES employee.supervisor(supervisor_id) NOT NULL,
 	employee_id INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
@@ -235,7 +235,7 @@ CREATE TABLE employee.supervisor_employee ( -- assigning employees to supervisor
 
 
 -- Schema: Attendance & Leave
-CREATE TABLE attendance.site (
+CREATE TABLE IF NOT EXISTS attendance.site (
     site_id SERIAL PRIMARY KEY,
     site_name VARCHAR(100) NOT NULL,
     coordinates POINT NOT NULL,
@@ -244,7 +244,7 @@ CREATE TABLE attendance.site (
 	company_id INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE attendance.record (
+CREATE TABLE IF NOT EXISTS attendance.record (
     r_id SERIAL PRIMARY KEY,
     attendance_date DATE DEFAULT CURRENT_DATE NOT NULL,
 	company INTEGER REFERENCES company.company(company_id) NOT NULL,
@@ -258,7 +258,7 @@ CREATE TABLE attendance.record (
 	employee_id INTEGER REFERENCES employee.employee(employee_id)
 );
 
-CREATE TABLE attendance.leave_calendar ( -- iOS calendar as UI
+CREATE TABLE IF NOT EXISTS attendance.leave_calendar ( -- iOS calendar as UI
 	lc_id SERIAL PRIMARY KEY,
 	annual_holiday DATE NOT NULL,
 	is_active BOOLEAN DEFAULT TRUE,
@@ -267,21 +267,21 @@ CREATE TABLE attendance.leave_calendar ( -- iOS calendar as UI
 	company_id INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE attendance.weekly_holiday_config ( -- assuming Saturday = 1, thus Friday = 7
+CREATE TABLE IF NOT EXISTS attendance.weekly_holiday_config ( -- assuming Saturday = 1, thus Friday = 7
 	config_id SERIAL PRIMARY KEY,
 	start_day SMALLINT NOT NULL,
 	end_day SMALLINT NOT NULL,
 	company_id INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE attendance.leave_type (
+CREATE TABLE IF NOT EXISTS attendance.leave_type (
 	type_id SERIAL PRIMARY KEY,
     type_name VARCHAR(30) NOT NULL,
 	annual_quota SMALLINT NOT NULL,
     company_id INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE attendance.leave_request ( -- checks if the leave balance <= 0. If yes, gives warning, otherwise request goes through
+CREATE TABLE IF NOT EXISTS attendance.leave_request ( -- checks if the leave balance <= 0. If yes, gives warning, otherwise request goes through
 	lr_id SERIAL PRIMARY KEY,
 	leave_type INTEGER REFERENCES attendance.leave_type(type_id) NOT NULL,
 	start_date DATE NOT NULL,
@@ -293,7 +293,7 @@ CREATE TABLE attendance.leave_request ( -- checks if the leave balance <= 0. If 
 	company_id INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE attendance.leave_balance (
+CREATE TABLE IF NOT EXISTS attendance.leave_balance (
 	lb_id SERIAL PRIMARY KEY,
 	employee_id INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
 	company_id INTEGER REFERENCES company.company(company_id),
@@ -301,7 +301,7 @@ CREATE TABLE attendance.leave_balance (
 	leave_balance SMALLINT NOT NULL -- is updated everytime a leave is accepted
 );
 
-CREATE TABLE attendance.leave_record ( -- records only when leave is accepted
+CREATE TABLE IF NOT EXISTS attendance.leave_record ( -- records only when leave is accepted
 	lr_id SERIAL PRIMARY KEY,
 	employee_id INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
 	type_id INTEGER REFERENCES attendance.leave_type(type_id) NOT NULL,
@@ -312,7 +312,7 @@ CREATE TABLE attendance.leave_record ( -- records only when leave is accepted
 	company_id INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE attendance.status ( -- to return the attendance status, at first check attendance_record, is yes ('PRESENT' / 'LATE'), if no, check leave_calendar for holiday (no record for holiday and weekends), then check leave_record for accepted leave (if yes, 'On Leave'), if no, 'Absent'
+CREATE TABLE IF NOT EXISTS attendance.status ( -- to return the attendance status, at first check attendance_record, is yes ('PRESENT' / 'LATE'), if no, check leave_calendar for holiday (no record for holiday and weekends), then check leave_record for accepted leave (if yes, 'On Leave'), if no, 'Absent'
 	s_id SERIAL PRIMARY KEY,
 	status VARCHAR(20) NOT NULL,
 	CHECK (status IN ('PRESENT', 'ABSENT', 'LATE', 'WRONG_LOCATION')),
@@ -322,7 +322,7 @@ CREATE TABLE attendance.status ( -- to return the attendance status, at first ch
 
 
 -- Schema: Project Management
-CREATE TABLE project.project_record (
+CREATE TABLE IF NOT EXISTS project.project_record (
     project_id SERIAL PRIMARY KEY,
     project_title VARCHAR(200) NOT NULL,
     description TEXT,
@@ -335,7 +335,7 @@ CREATE TABLE project.project_record (
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE project.project_status (
+CREATE TABLE IF NOT EXISTS project.project_status (
 	pstatus_id SERIAL PRIMARY KEY,
 	status VARCHAR(20) NOT NULL,
 	CHECK (status IN ('NOT_STARTED', 'IN_PROGRESS', 'ON_HOLD', 'COMPLETED', 'ARCHIEVED')),
@@ -345,20 +345,20 @@ CREATE TABLE project.project_status (
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE project.project_dept (
+CREATE TABLE IF NOT EXISTS project.project_dept (
 	pdept_id SERIAL PRIMARY KEY,
 	project INTEGER REFERENCES project.project_record(project_id),
 	department INTEGER REFERENCES company.dept(dept_id)
 );
 
-CREATE TABLE project.project_progression (
+CREATE TABLE IF NOT EXISTS project.project_progression (
 	p_progress_id SERIAL PRIMARY KEY,
 	progress DECIMAL(3,2) NOT NULL, -- =(milestone_progression / no. of milestone * 100)
 	project INTEGER REFERENCES project.project_record(project_id),
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE project.project_outcome (
+CREATE TABLE IF NOT EXISTS project.project_outcome (
 	p_outcome_id SERIAL PRIMARY KEY,
 	p_outcome VARCHAR(200) NOT NULL,
 	p_result VARCHAR(20) NOT NULL,
@@ -377,7 +377,7 @@ ADD COLUMN progress INTEGER REFERENCES project.project_progression(p_progress_id
 ALTER TABLE project.project_record
 ADD COLUMN outcome INTEGER REFERENCES project.project_outcome(p_outcome_id);
 
-CREATE TABLE project.milestone_record (
+CREATE TABLE IF NOT EXISTS project.milestone_record (
 	milestone_id SERIAL PRIMARY KEY,
 	milestone_title VARCHAR(200) NOT NULL,
     description TEXT,
@@ -391,14 +391,14 @@ CREATE TABLE project.milestone_record (
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE project.milestone_assignment (
+CREATE TABLE IF NOT EXISTS project.milestone_assignment (
 	ma_id SERIAL PRIMARY KEY,
 	milestone INTEGER REFERENCES project.milestone_record(milestone_id),
 	assignee INTEGER REFERENCES employee.employee(employee_id),
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE project.milestone_comment (
+CREATE TABLE IF NOT EXISTS project.milestone_comment (
 	mc_id SERIAL PRIMARY KEY,
 	mcomment TEXT,
 	commentor INTEGER REFERENCES employee.employee(employee_id),
@@ -409,7 +409,7 @@ CREATE TABLE project.milestone_comment (
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE project.milestone_progression (
+CREATE TABLE IF NOT EXISTS project.milestone_progression (
 	mp_id SERIAL PRIMARY KEY,
 	progress DECIMAL(3,2) NOT NULL, -- (== no. of task completed / total no. of tasks in this milestone)
 	milestone INTEGER REFERENCES project.milestone_record(milestone_id),
@@ -420,7 +420,7 @@ CREATE TABLE project.milestone_progression (
 ALTER TABLE project.project_dept
 ADD COLUMN company INTEGER REFERENCES company.company(company_id);
 
-CREATE TABLE project.task_record (
+CREATE TABLE IF NOT EXISTS project.task_record (
 	task_id SERIAL PRIMARY KEY,
 	task_title VARCHAR(200) NOT NULL,
 	task_description TEXT,
@@ -434,14 +434,14 @@ CREATE TABLE project.task_record (
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE project.task_assignment (
+CREATE TABLE IF NOT EXISTS project.task_assignment (
 	ta_id SERIAL PRIMARY KEY,
 	task INTEGER REFERENCES project.task_record(task_id),
 	assignee INTEGER REFERENCES employee.employee(employee_id),
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE project.task_update (
+CREATE TABLE IF NOT EXISTS project.task_update (
 	tu_id SERIAL PRIMARY KEY,
 	task INTEGER REFERENCES project.task_record(task_id),
 	has_issue BOOLEAN DEFAULT FALSE,
@@ -454,19 +454,19 @@ CREATE TABLE project.task_update (
 );
 
 -- Schema: Stakeholder Management
-CREATE TABLE stakeholder.type (
+CREATE TABLE IF NOT EXISTS stakeholder.type (
     type_id SERIAL PRIMARY KEY,
     type_name VARCHAR(20) NOT NULL,
     CHECK (type_name IN ('Client', 'Supplier', 'Lead', 'Vendor'))
 );
 
-CREATE TABLE stakeholder.category (
+CREATE TABLE IF NOT EXISTS stakeholder.category (
 	category_id SERIAL PRIMARY KEY,
     category_name VARCHAR(20) NOT NULL,
     CHECK (category_name IN ('Prospective','One-time','Recurring','On-Hold','Discontinued'))
 );
 
-CREATE TABLE stakeholder.record (
+CREATE TABLE IF NOT EXISTS stakeholder.record (
 	stakeholder_id SERIAL PRIMARY KEY,
     stakeholder_type INTEGER REFERENCES stakeholder.type(type_id) NOT NULL,
     category INTEGER REFERENCES stakeholder.category(category_id) NOT NULL,
@@ -485,25 +485,25 @@ CREATE TABLE stakeholder.record (
     updated_at TIMESTAMP NOT NULL -- ON UPDATE
 );
 
-CREATE TABLE stakeholder.interaction_p1 (
+CREATE TABLE IF NOT EXISTS stakeholder.interaction_p1 (
 	ip1_id SERIAL PRIMARY KEY,
 	interaction_type VARCHAR(10) NOT NULL,
 	CHECK(interaction_type IN ('Service','Product','Payment','Lead'))
 );
 
-CREATE TABLE stakeholder.interaction_p2 (
+CREATE TABLE IF NOT EXISTS stakeholder.interaction_p2 (
 	ip2_id SERIAL PRIMARY KEY,
 	interaction_type VARCHAR(10) NOT NULL,
 	CHECK(interaction_type IN ('Give','Receive','Update'))
 );
 
-CREATE TABLE stakeholder.activity_type ( -- Lead can only go with Update, other than that every other combination is possible
+CREATE TABLE IF NOT EXISTS stakeholder.activity_type ( -- Lead can only go with Update, other than that every other combination is possible
 	activity_type_id SERIAL PRIMARY KEY,
 	interaction_p1 INTEGER REFERENCES stakeholder.interaction_p1(ip1_id) NOT NULL,
 	interaction_p2 INTEGER REFERENCES stakeholder.interaction_p2(ip2_id) NOT NULL
 );
 
-CREATE TABLE stakeholder.activity_log ( -- can one activity log reference another previous activity log with log_id as reference key? For example: reference one 'Receive Payment_Client 1' activity log with 'Give Service_Client 1' activity log.
+CREATE TABLE IF NOT EXISTS stakeholder.activity_log ( -- can one activity log reference another previous activity log with log_id as reference key? For example: reference one 'Receive Payment_Client 1' activity log with 'Give Service_Client 1' activity log.
 	log_id SERIAL PRIMARY KEY,
 	activity_type INTEGER REFERENCES stakeholder.activity_type(activity_type_id) NOT NULL,
 	stakeholder INTEGER REFERENCES stakeholder.record(stakeholder_id) NOT NULL,
@@ -515,7 +515,7 @@ CREATE TABLE stakeholder.activity_log ( -- can one activity log reference anothe
 	updated_at TIMESTAMP
 );
 
-CREATE TABLE stakeholder.issue ( -- create issue || resolve issue
+CREATE TABLE IF NOT EXISTS stakeholder.issue ( -- create issue || resolve issue
 	si_id SERIAL PRIMARY KEY,
 	has_issue BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -526,7 +526,7 @@ CREATE TABLE stakeholder.issue ( -- create issue || resolve issue
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE stakeholder.auto_invoice ( -- activate only for recurring - is_active - monthly_subscription || ONE RECORD for each automation
+CREATE TABLE IF NOT EXISTS stakeholder.auto_invoice ( -- activate only for recurring - is_active - monthly_subscription || ONE RECORD for each automation
 	sai_id SERIAL PRIMARY KEY,
 	stakeholder INTEGER REFERENCES stakeholder.record(stakeholder_id) NOT NULL,
 	is_recurring BOOLEAN NOT NULL, -- if recurring put 1, otherwise 0
@@ -537,7 +537,7 @@ CREATE TABLE stakeholder.auto_invoice ( -- activate only for recurring - is_acti
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE stakeholder.transaction (
+CREATE TABLE IF NOT EXISTS stakeholder.transaction (
 	st_id SERIAL PRIMARY KEY,
 	activity_log INTEGER REFERENCES stakeholder.activity_log(log_id) NOT NULL,
 	stakeholder INTEGER REFERENCES stakeholder.record(stakeholder_id) NOT NULL,
@@ -551,7 +551,7 @@ CREATE TABLE stakeholder.transaction (
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE stakeholder.payment_approval(
+CREATE TABLE IF NOT EXISTS stakeholder.payment_approval(
 	p_approval_id SERIAL PRIMARY KEY,
 	payment_log INTEGER REFERENCES stakeholder.transaction(st_id),
 	approval BOOLEAN DEFAULT FALSE, -- true = approved
@@ -559,7 +559,7 @@ CREATE TABLE stakeholder.payment_approval(
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE stakeholder.stakeholder_address (
+CREATE TABLE IF NOT EXISTS stakeholder.stakeholder_address (
 	ssa_id SERIAL PRIMARY KEY,
     stakeholder INTEGER REFERENCES stakeholder.record(stakeholder_id),
     address_id INTEGER REFERENCES company.address(address_id) NOT NULL,
@@ -572,20 +572,20 @@ CREATE TABLE stakeholder.stakeholder_address (
 
 
 -- Schema: Transaction
-CREATE TABLE transaction.payment_method (
+CREATE TABLE IF NOT EXISTS transaction.payment_method (
 	pm_id SERIAL PRIMARY KEY,
 	method_name VARCHAR(10) NOT NULL,
 	CHECK(method_name IN('Cash','Bank','MFS'))
 );
 
-CREATE TABLE transaction.mfs_record (
+CREATE TABLE IF NOT EXISTS transaction.mfs_record (
 	mfsr_id SERIAL PRIMARY KEY,
 	mfs_provider VARCHAR(25) NOT NULL,
 	CHECK(mfs_provider IN('Bkash','Nagad','Upay','Rocket','Tap')),
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE transaction.mfs_transaction ( -- redirects to this if payment_method = MFS
+CREATE TABLE IF NOT EXISTS transaction.mfs_transaction ( -- redirects to this if payment_method = MFS
 	mfst_id SERIAL PRIMARY KEY,
 	provider INTEGER REFERENCES transaction.mfs_record(mfsr_id) NOT NULL,
 	date TIMESTAMP, -- Date of transaction
@@ -600,7 +600,7 @@ CREATE TABLE transaction.mfs_transaction ( -- redirects to this if payment_metho
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE transaction.cash_transaction ( -- redirects to this if payment_method = Cash
+CREATE TABLE IF NOT EXISTS transaction.cash_transaction ( -- redirects to this if payment_method = Cash
 	ct_id SERIAL PRIMARY KEY,
 	date TIMESTAMP, -- Date of transaction
 	amount DECIMAL(10,2) NOT NULL,
@@ -612,13 +612,13 @@ CREATE TABLE transaction.cash_transaction ( -- redirects to this if payment_meth
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE transaction.bank (
+CREATE TABLE IF NOT EXISTS transaction.bank (
 	bank_id SERIAL PRIMARY KEY,
 	country INTEGER REFERENCES company.country(country_id) NOT NULL,
 	bank_name VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE transaction.bank_account (
+CREATE TABLE IF NOT EXISTS transaction.bank_account (
 	ba_id SERIAL PRIMARY KEY,
 	bank INTEGER REFERENCES transaction.bank(bank_id),
 	owning_entity VARCHAR(25) NOT NULL, -- who owns the bank account
@@ -630,7 +630,7 @@ CREATE TABLE transaction.bank_account (
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE transaction.bank_transaction ( -- redirects to this if payment_method = Bank
+CREATE TABLE IF NOT EXISTS transaction.bank_transaction ( -- redirects to this if payment_method = Bank
 	bt_id SERIAL PRIMARY KEY,
 	date TIMESTAMP, -- date of transaction
 	from_account INTEGER REFERENCES transaction.bank_account(ba_id), -- account_alias can be used from front end
@@ -644,7 +644,7 @@ CREATE TABLE transaction.bank_transaction ( -- redirects to this if payment_meth
 );
 
 -- Schema: Payroll Management
-CREATE TABLE payroll.salary_component ( -- this assumes that fixed and gross components remain the same for all employees in the company
+CREATE TABLE IF NOT EXISTS payroll.salary_component ( -- this assumes that fixed and gross components remain the same for all employees in the company
 	psc_id SERIAL PRIMARY KEY,
 	component_name VARCHAR(50) NOT NULL, -- verify with Income Tax Manual
 	CHECK(component_name IN('Basic Salary','Home Rent Allowance','Festival Bonus','Car Maintenance Allowance','Mobile Bill','Entertainment Allowance','Convenyance Allowance','Overtime Pay','Lunch Subsidy','Employee contribution to PF')),
@@ -653,7 +653,7 @@ CREATE TABLE payroll.salary_component ( -- this assumes that fixed and gross com
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE payroll.employee_f_salary (
+CREATE TABLE IF NOT EXISTS payroll.employee_f_salary (
 	pefs_id SERIAL PRIMARY KEY,
 	employee INTEGER REFERENCES employee.employee(employee_id),
 	salary_component INTEGER REFERENCES payroll.salary_component(psc_id),
@@ -667,7 +667,7 @@ CREATE TABLE payroll.employee_f_salary (
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE payroll.employee_v_salary (
+CREATE TABLE IF NOT EXISTS payroll.employee_v_salary (
 	pevs_id SERIAL PRIMARY KEY,
 	employee INTEGER REFERENCES employee.employee(employee_id),
 	salary_component INTEGER REFERENCES payroll.salary_component(psc_id),
@@ -680,7 +680,7 @@ CREATE TABLE payroll.employee_v_salary (
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE payroll.employee_salary_record (
+CREATE TABLE IF NOT EXISTS payroll.employee_salary_record (
 	pesr_id SERIAL PRIMARY KEY,
 	employee INTEGER REFERENCES employee.employee(employee_id),
 	which_month DATE NOT NULL, -- format the month from front-end UI
@@ -694,7 +694,7 @@ CREATE TABLE payroll.employee_salary_record (
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE payroll.disbursement (
+CREATE TABLE IF NOT EXISTS payroll.disbursement (
 	pd_id SERIAL PRIMARY KEY,
 	employee INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
 	salary_record INTEGER REFERENCES payroll.employee_salary_record(pesr_id) NOT NULL,
@@ -706,7 +706,7 @@ CREATE TABLE payroll.disbursement (
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE payroll.salary_accumulation ( -- if is_current = FALSE (Fixed + Variable), the amount gets accumulated over the years || Automatically creates a record when f & v (l) becomes due
+CREATE TABLE IF NOT EXISTS payroll.salary_accumulation ( -- if is_current = FALSE (Fixed + Variable), the amount gets accumulated over the years || Automatically creates a record when f & v (l) becomes due
 	psa_id SERIAL PRIMARY KEY,
 	variable_salary INTEGER REFERENCES payroll.employee_v_salary(pevs_id) NOT NULL,
 	fixed_salalry INTEGER REFERENCES payroll.employee_f_salary(pefs_id) NOT NULL,
@@ -720,7 +720,7 @@ CREATE TABLE payroll.salary_accumulation ( -- if is_current = FALSE (Fixed + Var
 
 
 -- Schema: Administrative Management
-CREATE TABLE administration.notice_type (
+CREATE TABLE IF NOT EXISTS administration.notice_type (
 	nt_id SERIAL PRIMARY KEY,
 	type_name VARCHAR(50) NOT NULL,
 	CHECK(type_name IN('General Announcement', 'HR Update', 'Administrative Notice', 'Event', 'Policy Update', 'Training/Workshop','Others')),
@@ -728,13 +728,13 @@ CREATE TABLE administration.notice_type (
 	updated_at TIMESTAMP -- on-update
 );
 
-CREATE TABLE administration.company_notice (
+CREATE TABLE IF NOT EXISTS administration.company_notice (
 	cn_id SERIAL PRIMARY KEY,
 	notice_type INTEGER REFERENCES administration.notice_type(nt_id) NOT NULL,
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE administration.notice_record (
+CREATE TABLE IF NOT EXISTS administration.notice_record (
 	nr_id SERIAL PRIMARY KEY,
 	notice_type INTEGER REFERENCES administration.notice_type(nt_id) NOT NULL,
 	title VARCHAR(200) NOT NULL,
@@ -748,34 +748,34 @@ CREATE TABLE administration.notice_record (
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE administration.notice_dept ( -- tag the notice to everyone of this dept.
+CREATE TABLE IF NOT EXISTS administration.notice_dept ( -- tag the notice to everyone of this dept.
 	nd_id SERIAL PRIMARY KEY,
 	notice_record INTEGER REFERENCES administration.notice_record(nr_id) NOT NULL,
 	department INTEGER REFERENCES company.dept(dept_id) NOT NULL,
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE administration.notice_unit ( -- tag the notice to everyone of this unit.
+CREATE TABLE IF NOT EXISTS administration.notice_unit ( -- tag the notice to everyone of this unit.
 	nu_id SERIAL PRIMARY KEY,
 	notice_record INTEGER REFERENCES administration.notice_record(nr_id) NOT NULL,
 	unit INTEGER REFERENCES company.unit(unit_id) NOT NULL,
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE administration.complaint_type (
+CREATE TABLE IF NOT EXISTS administration.complaint_type (
 	ct_id SERIAL PRIMARY KEY,
 	complaint_type VARCHAR(25) NOT NULL,
 	CHECK(complaint_type IN('Discrimination', 'Bullying', 'Harassment', 'Work Conditions', 'Workplace health & safety', 'Management', 'Work environment', 'Interpersonal Conflicts', 'Retaliation', 'Verbal abuse', 'Workload grievances', 'Workplace violence', 'Others')),
 	updated_at TIMESTAMP -- on-update
 );
 
-CREATE TABLE administration.company_complaint (
+CREATE TABLE IF NOT EXISTS administration.company_complaint (
 	cc_id SERIAL PRIMARY KEY,
 	complaint INTEGER REFERENCES administration.complaint_type(ct_id) NOT NULL,
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE administration.compliant_record (
+CREATE TABLE IF NOT EXISTS administration.compliant_record (
 	cr_id SERIAL PRIMARY KEY,
 	complaint_type INTEGER REFERENCES administration.complaint_type(ct_id) NOT NULL,
 	complainer INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
@@ -788,7 +788,7 @@ CREATE TABLE administration.compliant_record (
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE administration.claim_type (
+CREATE TABLE IF NOT EXISTS administration.claim_type (
 	c_type_id SERIAL PRIMARY KEY,
 	claim_items VARCHAR(25) NOT NULL,
 	description TEXT NOT NULL,
@@ -797,7 +797,7 @@ CREATE TABLE administration.claim_type (
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE administration.claim_record (
+CREATE TABLE IF NOT EXISTS administration.claim_record (
 	c_record_id SERIAL PRIMARY KEY,
 	claim_item INTEGER REFERENCES administration.claim_type(c_type_id) NOT NULL,
 	event_date DATE NOT NULL, -- date of the event for which you asked for a claim
@@ -811,14 +811,14 @@ CREATE TABLE administration.claim_record (
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE administration.requisition_type (
+CREATE TABLE IF NOT EXISTS administration.requisition_type (
 	r_type_id SERIAL PRIMARY KEY,
 	requisition_item VARCHAR(50) NOT NULL,
 	description TEXT,
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE administration.requisition_inventory (
+CREATE TABLE IF NOT EXISTS administration.requisition_inventory (
 	ri_id SERIAL PRIMARY KEY,
 	requisition_item INTEGER REFERENCES administration.requisition_type(r_type_id),
 	current_balance INT NOT NULL, --quantity of the item left
@@ -827,7 +827,7 @@ CREATE TABLE administration.requisition_inventory (
 	company INTEGER REFERENCES company.company(company_id) NOT NULL
 );
 
-CREATE TABLE administration.requisition_record (
+CREATE TABLE IF NOT EXISTS administration.requisition_record (
 	rr_id SERIAL PRIMARY KEY,
 	requisition_item INTEGER REFERENCES administration.requisition_type(r_type_id) NOT NULL,
 	employee INTEGER REFERENCES employee.employee(employee_id) NOT NULL, -- can be IT for discarding or employee for acquiring
@@ -843,7 +843,7 @@ CREATE TABLE administration.requisition_record (
 
 
 -- Schema: Performance Management
-CREATE TABLE performance.evaluation_type (
+CREATE TABLE IF NOT EXISTS performance.evaluation_type (
 	pet_id SERIAL PRIMARY KEY,
 	evaluation_type VARCHAR(50) NOT NULL,
 	CHECK(evaluation_type IN('Supervisor Feedback','Peer-to-peer Feedback','Project-based Feedback')),
@@ -852,13 +852,13 @@ CREATE TABLE performance.evaluation_type (
 	company INTEGER REFERENCES company.company(company_id)
 );
 
-CREATE TABLE performance.evaluation_metric (
+CREATE TABLE IF NOT EXISTS performance.evaluation_metric (
 	pem_id SERIAL PRIMARY KEY,
 	metric VARCHAR(50) NOT NULL,
 	CHECK(metric IN('Job Knowledge and Expertise','Quality of Work','Productivity and Efficiency','Communication Skills','Problem-Solving and Innovation','Teamwork and Collaboration','Adaptability and Flexibility','Reliability and Accountability','Goal Completion','Commitment to Growth and Learning'))
 );
 
-CREATE TABLE performance.supervisor_rating ( -- when 'Supervisor Feedback' is chosen || only possible when HR opens the portal
+CREATE TABLE IF NOT EXISTS performance.supervisor_rating ( -- when 'Supervisor Feedback' is chosen || only possible when HR opens the portal
 	psr_id SERIAL PRIMARY KEY,
 	rater INTEGER REFERENCES employee.supervisor(supervisor_id) NOT NULL, -- check whether supervisor or not
 	ratee INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
@@ -880,7 +880,7 @@ CREATE TABLE performance.supervisor_rating ( -- when 'Supervisor Feedback' is ch
 	areas_to_improve TEXT
 );
 
-CREATE TABLE performance.peer_rating ( -- when 'Peer-to-peer Feedback' is chosen || only possible when HR opens the portal
+CREATE TABLE IF NOT EXISTS performance.peer_rating ( -- when 'Peer-to-peer Feedback' is chosen || only possible when HR opens the portal
 	peer_id SERIAL PRIMARY KEY,
 	rater INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
 	ratee INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
@@ -902,7 +902,7 @@ CREATE TABLE performance.peer_rating ( -- when 'Peer-to-peer Feedback' is chosen
 	areas_to_improve TEXT
 );
 
-CREATE TABLE performance.project_rating ( -- when 'Project Feedback' is chosen || only possible when HR opens the portal
+CREATE TABLE IF NOT EXISTS performance.project_rating ( -- when 'Project Feedback' is chosen || only possible when HR opens the portal
 	ppr_id SERIAL PRIMARY KEY,
 	rater INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
 	ratee INTEGER REFERENCES employee.employee(employee_id) NOT NULL,

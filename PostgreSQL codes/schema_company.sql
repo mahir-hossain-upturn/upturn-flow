@@ -1,104 +1,105 @@
-CREATE TABLE company.country (
-    country_id SERIAL PRIMARY KEY,
-    country_name VARCHAR(50) NOT NULL
+-- Active: 1734942825534@@127.0.0.1@5432@flow
+CREATE TABLE IF NOT EXISTS company.country (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE company.industry (
-    industry_id SERIAL PRIMARY KEY,
-    industry_name VARCHAR(100) NOT NULL -- did input for all the possible industry for data validation
+CREATE TABLE IF NOT EXISTS company.industry (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL, -- did input for all the possible industry for data validation
     updated_at TIMESTAMP NOT NULL -- at update
 );
 
-CREATE TABLE company.country_industry ( -- this table works as the input field for country & industry when a company registers
-ci_id SERIAL PRIMARY KEY,
-country INTEGER REFERENCES company.country(country_id) NOT NULL,
-industry INTEGER REFERENCES company.industry(industry_id) NOT NULL
+CREATE TABLE IF NOT EXISTS company.country_industry ( -- this table works as the input field for country & industry when a company registers
+id SERIAL PRIMARY KEY,
+country_id INTEGER REFERENCES company.country(id) NOT NULL,
+industry_id INTEGER REFERENCES company.industry(id) NOT NULL
 );
 
-CREATE TABLE company.currency (
-    currency_code VARCHAR(3) PRIMARY KEY,
-	currency_name VARCHAR(25) NOT NULL
+CREATE TABLE IF NOT EXISTS company.currency (
+    code VARCHAR(3) PRIMARY KEY,
+	name VARCHAR(25) NOT NULL
 );
 
-CREATE TABLE company.company (
-company_id SERIAL PRIMARY KEY NOT NULL,
-company_name VARCHAR(100) NOT NULL,
-company_code VARCHAR(50) UNIQUE NOT NULL, -- data validation required to ask for more than 8 characters, 1 uc, 1lc, 1 special
-country_industry INTEGER REFERENCES company.country_industry(ci_id) NOT NULL,
+CREATE TABLE IF NOT EXISTS company.company (
+id SERIAL PRIMARY KEY NOT NULL,
+name VARCHAR(100) NOT NULL,
+code VARCHAR(50) UNIQUE NOT NULL, -- data validation required to ask for more than 8 characters, 1 uc, 1lc, 1 special
+industry_id INTEGER REFERENCES company.country_industry(id) NOT NULL,
 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 updated_at TIMESTAMP NOT NULL -- at update
 );
 
-CREATE TABLE company.division (
-    div_id SERIAL PRIMARY KEY,
-    div_name VARCHAR(50) NOT NULL,
-    div_head INTEGER REFERENCES employee.employee(employee_id),
+CREATE TABLE IF NOT EXISTS company.division (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    head_id INTEGER REFERENCES employee.employee(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL, -- at update
-    company INTEGER REFERENCES company.company(company_id) NOT NULL
+    company_id INTEGER REFERENCES company.company(id) NOT NULL
 );
 
-CREATE TABLE company.department (
-    dept_id SERIAL PRIMARY KEY,
-    dept_name VARCHAR(50) NOT NULL,
-    dept_head INTEGER REFERENCES employee.employee(employee_id),
-    dept_description TEXT, -- input the JD here || create a rich text dialog box
-    company INTEGER REFERENCES company.company(company_id) NOT NULL,
+CREATE TABLE IF NOT EXISTS company.department (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    head_id INTEGER REFERENCES employee.employee(id),
+    description TEXT, -- input the JD here || create a rich text dialog box
+    company_id INTEGER REFERENCES company.company(id) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP NOT NULL -- at update
 );
 
-CREATE TABLE company.unit (
-    unit_id SERIAL PRIMARY KEY,
-    unit_name VARCHAR(50) NOT NULL,
-    unit_head INTEGER REFERENCES employee.employee(employee_id),
-    company INTEGER REFERENCES company.company(company_id) NOT NULL,
+CREATE TABLE IF NOT EXISTS company.unit (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    head_id INTEGER REFERENCES employee.employee(id),
+    company_id INTEGER REFERENCES company.company(id) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP NOT NULL -- at update
 );
 
-CREATE TABLE company.position (
-    position_id SERIAL PRIMARY KEY,
-    position_name VARCHAR(50) NOT NULL,
-    position_jd TEXT,
-    position_grade VARCHAR(10),
+CREATE TABLE IF NOT EXISTS company.position (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    jd TEXT,
+    grade VARCHAR(10),
     salary_range_min DECIMAL(10,2),
     salary_range_max DECIMAL(10,2),
-    company INTEGER REFERENCES company.company(company_id) NOT NULL,
+    company_id INTEGER REFERENCES company.company(id) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL -- at update
 );
 
-CREATE TABLE company.designation (
-    desig_id SERIAL PRIMARY KEY,
-    company INTEGER REFERENCES company.company(company_id) NOT NULL,
-    division INTEGER REFERENCES company.division(div_id),
-    dept INTEGER REFERENCES company.dept(dept_id),
-    unit INTEGER REFERENCES company.unit(unit_id),
-    position INTEGER REFERENCES company.position(position_id) NOT NULL,
+CREATE TABLE IF NOT EXISTS company.designation (
+    id SERIAL PRIMARY KEY,
+    company_id INTEGER REFERENCES company.company(id) NOT NULL,
+    division_id INTEGER REFERENCES company.division(id),
+    dept_id INTEGER REFERENCES company.dept(id),
+    unit_id INTEGER REFERENCES company.unit(id),
+    position_id INTEGER REFERENCES company.position(id) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL -- at update
 );
 
-CREATE TABLE company.role (
-    role_id SERIAL PRIMARY KEY,
-    role_name VARCHAR(50) NOT NULL,
+CREATE TABLE IF NOT EXISTS company.role (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
     CHECK(role_name IN('Super Admin','Admin','HR','Supervisor','End User')),
-    company INTEGER REFERENCES company.company(company_id) NOT NULL,
-    employee INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
+    company_id INTEGER REFERENCES company.company(id) NOT NULL,
+    employee_id INTEGER REFERENCES employee.employee(id) NOT NULL,
     is_active BOOLEAN DEFAULT TRUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL -- at update
 );
 
-CREATE TABLE company.address ( 
-    address_id SERIAL PRIMARY KEY,
-    address_type VARCHAR(20) NOT NULL,
+CREATE TABLE IF NOT EXISTS company.address ( 
+    id SERIAL PRIMARY KEY,
+    type VARCHAR(20) NOT NULL,
     CHECK(address_type IN('Employee','Client','Supplier','Vendor','Lead')),
     street_address VARCHAR(100) NOT NULL,
     city VARCHAR(20) NOT NULL,
     state VARCHAR(20),
     postal_code VARCHAR(10),
-    country INTEGER REFERENCES company.country(country_id) NOT NULL
-    company INTEGER REFERENCES company.company(company_id) NOT NULL
+    country INTEGER REFERENCES company.country(id) NOT NULL
+    company INTEGER REFERENCES company.company(id) NOT NULL
 );

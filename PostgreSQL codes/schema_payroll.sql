@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS payroll.salary_component ( -- this assumes that fixed and gross components remain the same for all employees in the company
 	id SERIAL PRIMARY KEY,
-	component_name VARCHAR(50) NOT NULL, -- verify with Income Tax Manual
-	CHECK(component_name IN('Basic Salary','Home Rent Allowance','Festival Bonus','Car Maintenance Allowance','Mobile Bill','Entertainment Allowance','Convenyance Allowance','Overtime Pay','Lunch Subsidy','Employee contribution to PF')),
+	name VARCHAR(50) NOT NULL, -- verify with Income Tax Manual
+	CHECK(name IN('Basic Salary','Home Rent Allowance','Festival Bonus','Car Maintenance Allowance','Mobile Bill','Entertainment Allowance','Convenyance Allowance','Overtime Pay','Lunch Subsidy','Employee contribution to PF')),
 	is_fixed BOOLEAN DEFAULT TRUE, -- if not fixed, then variable
 	description TEXT,
 	company_id INTEGER REFERENCES company.company(id)
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS payroll.salary_accumulation ( -- if is_current = FALS
 	id SERIAL PRIMARY KEY,
 	variable_salary_id INTEGER REFERENCES payroll.employee_v_salary(id) NOT NULL,
 	fixed_salalry_id INTEGER REFERENCES payroll.employee_f_salary(id) NOT NULL,
-	net_balance NOT NULL, -- accumulation of f_salary(l) & v_salary(l) till date
+	net_balance INTEGER NOT NULL, -- accumulation of f_salary(l) & v_salary(l) till date
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP,
 	employee_id INTEGER REFERENCES employee.employee(id) NOT NULL,

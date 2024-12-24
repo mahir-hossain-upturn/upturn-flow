@@ -72,8 +72,8 @@ CREATE TABLE IF NOT EXISTS stakeholder.issue ( -- create issue || resolve issue
 
 CREATE TABLE IF NOT EXISTS stakeholder.auto_invoice ( -- activate only for recurring - is_active - monthly_subscription || ONE RECORD for each automation
 	id SERIAL PRIMARY KEY,
-	stakeholder_id INTEGER REFERENCES stakeholder.record(id) NOT NULL,
-	stakeholder_id INTEGER REFERENCES stakeholder.category(id) NOT NULL,
+	record_id INTEGER REFERENCES stakeholder.record(id) NOT NULL,
+	category_id INTEGER REFERENCES stakeholder.category(id) NOT NULL,
 	is_recurring BOOLEAN NOT NULL, -- if recurring put 1, otherwise 0
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP NOT NULL, -- on update

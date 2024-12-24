@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS performance.project_rating ( -- when 'Project Feedbac
 	ratee_id INTEGER REFERENCES employee.employee(id) NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP,
-	project_id INTEGER REFERENCES project.project_record(id) NOT NULL,
+	project_id INTEGER REFERENCES project.record(id) NOT NULL,
 	company_id INTEGER REFERENCES company.company(id) NOT NULL,
 	task_completion_efficiency SMALLINT NOT NULL, -- from 1 to 5
 	quality_of_deliverables SMALLINT NOT NULL, -- from 1 to 5

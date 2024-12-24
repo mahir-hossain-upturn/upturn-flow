@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS project.project (
+CREATE TABLE IF NOT EXISTS project.record (
     id SERIAL PRIMARY KEY,
     project_title VARCHAR(200) NOT NULL,
     description TEXT,
@@ -17,20 +17,20 @@ CREATE TABLE IF NOT EXISTS project.project_status (
 	CHECK (status IN ('NOT_STARTED', 'IN_PROGRESS', 'ON_HOLD', 'COMPLETED', 'ARCHIEVED')),
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP NOT NULL, -- on update
-	project_id INTEGER REFERENCES project.project(id),
+	project_id INTEGER REFERENCES project.record(id),
 	company_id INTEGER REFERENCES company.company(id)
 );
 
 CREATE TABLE IF NOT EXISTS project.project_dept (
 	id SERIAL PRIMARY KEY,
-	project_id INTEGER REFERENCES project.project(id),
-	department_id INTEGER REFERENCES company.department(id)
+	project_id INTEGER REFERENCES project.record(id),
+	department_id INTEGER REFERENCES company.dept(id)
 );
 
 CREATE TABLE IF NOT EXISTS project.project_progression (
 	id SERIAL PRIMARY KEY,
 	progress DECIMAL(3,2) NOT NULL, -- =(milestone_progression / no. of milestone * 100)
-	project_id INTEGER REFERENCES project.project(id),
+	project_id INTEGER REFERENCES project.record(id),
 	company_id INTEGER REFERENCES company.company(id)
 );
 
@@ -40,18 +40,18 @@ CREATE TABLE IF NOT EXISTS project.project_outcome (
 	p_result VARCHAR(20) NOT NULL,
 	CHECK (p_result IN ('NOT_ACHIEVED', 'ACHIEVED')), -- not null after project == completed
 	achievement DECIMAL(3,2) NOT NULL, -- default value assignment. Can be changed.
-	project_id INTEGER REFERENCES project.project(id),
+	project_id INTEGER REFERENCES project.record(id),
 	company_id INTEGER REFERENCES company.company(id)
 );
 
-ALTER TABLE project.project
-ADD COLUMN status_id INTEGER REFERENCES project.project_status (id);
+ALTER TABLE project.record
+ADD COLUMN IF NOT EXISTS status_id INTEGER REFERENCES project.project_status (id);
 
-ALTER TABLE project.project
-ADD COLUMN progress_id INTEGER REFERENCES project.project_progression(id);
+ALTER TABLE project.record
+ADD COLUMN IF NOT EXISTS progress_id INTEGER REFERENCES project.project_progression(id);
 
-ALTER TABLE project.project
-ADD COLUMN outcome_id INTEGER REFERENCES project.project_outcome(id);
+ALTER TABLE project.record
+ADD COLUMN IF NOT EXISTS outcome_id INTEGER REFERENCES project.project_outcome(id);
 
 CREATE TABLE IF NOT EXISTS project.milestone_record (
 	id SERIAL PRIMARY KEY,
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS project.milestone_record (
 	CHECK (status IN ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED')), -- (if a task has been created and assigned == 'In_Progress', otherwise == 'Not_Started') (if sum of task progression = 100, 'Completed', otherwise, 'In-Progress')
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP NOT NULL, -- on update
-	project_id INTEGER REFERENCES project.project(id),
+	project_id INTEGER REFERENCES project.record(id),
 	company_id INTEGER REFERENCES company.company(id)
 );
 
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS project.milestone_comment (
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP NOT NULL, -- comments can be edited for 1st 30 mins
 	milestone_id INTEGER REFERENCES project.milestone_record(id),
-	project_id INTEGER REFERENCES project.project(id),
+	project_id INTEGER REFERENCES project.record(id),
 	company_id INTEGER REFERENCES company.company(id)
 );
 
@@ -89,12 +89,12 @@ CREATE TABLE IF NOT EXISTS project.milestone_progression (
 	id SERIAL PRIMARY KEY,
 	progress DECIMAL(3,2) NOT NULL, -- (== no. of task completed / total no. of tasks in this milestone)
 	milestone_id INTEGER REFERENCES project.milestone_record(id),
-	project_id INTEGER REFERENCES project.project(id),
+	project_id INTEGER REFERENCES project.record(id),
 	company_id INTEGER REFERENCES company.company(id)
 );
 
 ALTER TABLE project.project_dept
-ADD COLUMN company_id INTEGER REFERENCES company.company(id);
+ADD COLUMN IF NOT EXISTS company_id INTEGER REFERENCES company.company(id);
 
 CREATE TABLE IF NOT EXISTS project.task_record (
 	id SERIAL PRIMARY KEY,
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS project.task_record (
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP NOT NULL, -- on update
 	milestone_id INTEGER REFERENCES project.milestone_record(id),
-	project_id INTEGER REFERENCES project.project(id),
+	project_id INTEGER REFERENCES project.record(id),
 	company_id INTEGER REFERENCES company.company(id)
 );
 
@@ -122,6 +122,6 @@ CREATE TABLE IF NOT EXISTS project.task_update (
 	task_id INTEGER REFERENCES project.task_record(id),
 	has_issue BOOLEAN DEFAULT FALSE,
 	milestone_id INTEGER REFERENCES project.milestone_record(id),
-	project_id INTEGER REFERENCES project.project(id),
+	project_id INTEGER REFERENCES project.record(id),
 	company_id INTEGER REFERENCES company.company(id)
 );

@@ -25,10 +25,10 @@ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 updated_at TIMESTAMP NOT NULL -- at update
 );
 
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA employee;
 
 CREATE TABLE IF NOT EXISTS employee.user ( -- used for AUTHENTICATION & AUTHORIZATION with Supabase
-    id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
 	username VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     is_active BOOLEAN DEFAULT FALSE NOT NULL, -- every session lasts for 60 minutes. If no activity for 60 minutes, the account logs out automatically. Account is only active if the tab / app is open last & last activity < 60 mins ago.

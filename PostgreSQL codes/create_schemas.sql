@@ -21,3 +21,6 @@ CREATE SCHEMA IF NOT EXISTS "transaction";
 \i schema_stakeholder.sql
 
 \i flow_indexing.sql
+
+-- Execute the following command to setup
+-- psql -U postgres -h 127.0.0.1 -p 5432 -d flow -f create_schemas.sql

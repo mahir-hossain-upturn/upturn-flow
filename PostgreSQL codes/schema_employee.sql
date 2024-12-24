@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS employee.employee (
     id SERIAL PRIMARY KEY,
 	company_id INTEGER REFERENCES company.company(id) NOT NULL,
     employee_id_input VARCHAR(20), -- MIR1238 indicates a specific employee || search functionality can be applied to this.
-	user_id uuid REFERENCES employee.user(user_id) UNIQUE,
+	user_id uuid REFERENCES employee.user(id) UNIQUE,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     phone_number VARCHAR(20),
@@ -23,31 +23,31 @@ CREATE TABLE IF NOT EXISTS employee.employee (
 );
 
 ALTER TABLE employee.user 
-ADD COLUMN employee_id INTEGER REFERENCES employee.employee(employee_id) UNIQUE;
+ADD COLUMN employee_id INTEGER REFERENCES employee.employee(id) UNIQUE;
 
 CREATE TABLE IF NOT EXISTS employee.employee_designation (
-    ep_id SERIAL PRIMARY KEY,
-	employee_id INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
-    designation INTEGER REFERENCES company.designation(desig_id), -- div, dept, unit & position can be traced with Join
+    id SERIAL PRIMARY KEY,
+	employee_id INTEGER REFERENCES employee.employee(id) NOT NULL,
+    designation_id INTEGER REFERENCES company.designation(id), -- div, dept, unit & position can be traced with Join
     start_date DATE NOT NULL, -- position start date
     end_date DATE, -- position end date
     is_current BOOLEAN DEFAULT true, -- (to store all positions changes)
-    approved_by INTEGER REFERENCES employee.employee(employee_id), -- (approval required before changing position in the system)
+    approved_by_id INTEGER REFERENCES employee.employee(id), -- (approval required before changing position in the system)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    company INTEGER REFERENCES company.company(company_id) NOT NULL
+    company_id INTEGER REFERENCES company.company(id) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS employee.employee_address (
 	eea_id SERIAL PRIMARY KEY,
-    employee_id INTEGER REFERENCES employee.employee(employee_id),
-    address_id INTEGER REFERENCES company.address(address_id) NOT NULL,
-    company INTEGER REFERENCES company.company(company_id) NOT NULL,
+    employee_id INTEGER REFERENCES employee.employee(id),
+    address_id INTEGER REFERENCES company.address(id) NOT NULL,
+    company_id INTEGER REFERENCES company.company(id) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS employee.personal_info (
-    employee_id INTEGER REFERENCES employee.employee(employee_id) PRIMARY KEY,
+    employee_id INTEGER REFERENCES employee.employee(id) PRIMARY KEY,
     date_of_birth DATE,
     gender VARCHAR(10), -- provide drop-down from front-end
     CHECK(gender IN('Male','Female','Other')),
@@ -63,17 +63,17 @@ CREATE TABLE IF NOT EXISTS employee.personal_info (
     emergency_contact_name VARCHAR(50), -- put a tick mark beside the father / mother / spouse box, if chosen contact_name and relation not required, otherwise take input (can be of a friend)
     emergency_contact_phone VARCHAR(20),
     emergency_contact_relation VARCHAR(15), -- can be brother, friend
-    company INTEGER REFERENCES company.company(company_id)
+    company_id INTEGER REFERENCES company.company(id)
 );
 
 CREATE TABLE IF NOT EXISTS employee.qualification_type ( -- for the time being, just create the table and not link it with anything else
-eet_id SERIAL PRIMARY KEY,
-type_name VARCHAR(10) NOT NULL,
-CHECK(type_name IN('Training','Specialization','Schooling','Project','Publication'))
+id SERIAL PRIMARY KEY,
+name VARCHAR(10) NOT NULL,
+CHECK(name IN('Training','Specialization','Schooling','Project','Publication'))
 );
 
 CREATE TABLE IF NOT EXISTS employee.schooling (
-    edu_id SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     degree_type VARCHAR(50) NOT NULL, -- provide drop-down from front-end
     CHECK(degree_type IN('High School','College','Diploma','Bachelors','Masters','PGD','PhD','Post-Doc')),
     degree_name VARCHAR(50) NOT NULL,
@@ -81,31 +81,31 @@ CREATE TABLE IF NOT EXISTS employee.schooling (
     from_date DATE NOT NULL,
     to_date DATE NOT NULL,
     result VARCHAR(15) NOT NULL, -- GPA / CGPA / Division
-    employee_id INTEGER REFERENCES employee.employee(employee_id),
-    company INTEGER REFERENCES company.company(company_id)
+    employee_id INTEGER REFERENCES employee.employee(id),
+    company_id INTEGER REFERENCES company.company(id)
 );
 
 CREATE TABLE IF NOT EXISTS employee.experience (
-    exp_id SERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     company_name VARCHAR(50) NOT NULL,
     designation VARCHAR(25) NOT NULL,
     from_date DATE NOT NULL,
     to_date DATE NOT NULL,
     description TEXT,
-    employee_id INTEGER REFERENCES employee.employee(employee_id),
-    company INTEGER REFERENCES company.company(company_id) NOT NULL
+    employee_id INTEGER REFERENCES employee.employee(id),
+    company_id INTEGER REFERENCES company.company(id) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS employee.supervisor ( -- assigning who are supervisors
 	supervisor_id SERIAL PRIMARY KEY,
-	supervisor INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
+	supervisor_id INTEGER REFERENCES employee.employee(id) NOT NULL,
 	is_supervisor BOOLEAN DEFAULT TRUE NOT NULL,
-	company_id INTEGER REFERENCES company.company(company_id) NOT NULL
+	company_id INTEGER REFERENCES company.company(id) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS employee.supervisor_employee ( -- assigning employees to supervisors
 	es_id SERIAL PRIMARY KEY,
-	supervisor_id INTEGER REFERENCES employee.supervisor(supervisor_id) NOT NULL,
-	employee_id INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
-	company_id INTEGER REFERENCES company.company(company_id) NOT NULL
+	supervisor_id INTEGER REFERENCES employee.supervisor(id) NOT NULL,
+	employee_id INTEGER REFERENCES employee.employee(id) NOT NULL,
+	company_id INTEGER REFERENCES company.company(id) NOT NULL
 );

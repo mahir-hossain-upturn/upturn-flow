@@ -1,25 +1,25 @@
 CREATE TABLE IF NOT EXISTS performance.evaluation_type (
-	pet_id SERIAL PRIMARY KEY,
+	id SERIAL PRIMARY KEY,
 	evaluation_type VARCHAR(50) NOT NULL,
 	CHECK(evaluation_type IN('Supervisor Feedback','Peer-to-peer Feedback','Project-based Feedback')),
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP,
-	company INTEGER REFERENCES company.company(company_id)
+	company_id INTEGER REFERENCES company.company(id)
 );
 
 CREATE TABLE IF NOT EXISTS performance.evaluation_metric (
-	pem_id SERIAL PRIMARY KEY,
+	id SERIAL PRIMARY KEY,
 	metric VARCHAR(50) NOT NULL,
 	CHECK(metric IN('Job Knowledge and Expertise','Quality of Work','Productivity and Efficiency','Communication Skills','Problem-Solving and Innovation','Teamwork and Collaboration','Adaptability and Flexibility','Reliability and Accountability','Goal Completion','Commitment to Growth and Learning'))
 );
 
 CREATE TABLE IF NOT EXISTS performance.supervisor_rating ( -- when 'Supervisor Feedback' is chosen || only possible when HR opens the portal
-	psr_id SERIAL PRIMARY KEY,
-	rater INTEGER REFERENCES employee.supervisor(supervisor_id) NOT NULL, -- check whether supervisor or not
-	ratee INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
+	id SERIAL PRIMARY KEY,
+	rater_id INTEGER REFERENCES employee.supervisor(id) NOT NULL, -- check whether supervisor or not
+	ratee_id INTEGER REFERENCES employee.employee(id) NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP,
-	company INTEGER REFERENCES company.company(company_id) NOT NULL,
+	company_id INTEGER REFERENCES company.company(id) NOT NULL,
 	job_knowledge_and_expertise SMALLINT NOT NULL, -- from 1 to 5
 	quality_of_work SMALLINT NOT NULL, -- from 1 to 5
 	productivity_and_efficiency SMALLINT NOT NULL, -- from 1 to 5
@@ -36,12 +36,12 @@ CREATE TABLE IF NOT EXISTS performance.supervisor_rating ( -- when 'Supervisor F
 );
 
 CREATE TABLE IF NOT EXISTS performance.peer_rating ( -- when 'Peer-to-peer Feedback' is chosen || only possible when HR opens the portal
-	peer_id SERIAL PRIMARY KEY,
-	rater INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
-	ratee INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
+	id SERIAL PRIMARY KEY,
+	rater_id INTEGER REFERENCES employee.employee(id) NOT NULL,
+	ratee_id INTEGER REFERENCES employee.employee(id) NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP,
-	company INTEGER REFERENCES company.company(company_id) NOT NULL,
+	company_id INTEGER REFERENCES company.company(id) NOT NULL,
 	teamwork_and_cooperation SMALLINT NOT NULL, -- from 1 to 5
 	communication_effectiveness SMALLINT NOT NULL, -- from 1 to 5
 	conflict_resolution SMALLINT NOT NULL, -- from 1 to 5
@@ -58,13 +58,13 @@ CREATE TABLE IF NOT EXISTS performance.peer_rating ( -- when 'Peer-to-peer Feedb
 );
 
 CREATE TABLE IF NOT EXISTS performance.project_rating ( -- when 'Project Feedback' is chosen || only possible when HR opens the portal
-	ppr_id SERIAL PRIMARY KEY,
-	rater INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
-	ratee INTEGER REFERENCES employee.employee(employee_id) NOT NULL,
+	id SERIAL PRIMARY KEY,
+	rater_id INTEGER REFERENCES employee.employee(id) NOT NULL,
+	ratee_id INTEGER REFERENCES employee.employee(id) NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP,
-	project INTEGER REFERENCES project.project_record(project_id) NOT NULL,
-	company INTEGER REFERENCES company.company(company_id) NOT NULL,
+	project_id INTEGER REFERENCES project.project_record(id) NOT NULL,
+	company_id INTEGER REFERENCES company.company(id) NOT NULL,
 	task_completion_efficiency SMALLINT NOT NULL, -- from 1 to 5
 	quality_of_deliverables SMALLINT NOT NULL, -- from 1 to 5
 	responsiveness SMALLINT NOT NULL, -- from 1 to 5

@@ -1,21 +1,21 @@
-CREATE TABLE IF NOT EXISTS performance.evaluation_type (
-	id SERIAL PRIMARY KEY,
-	evaluation_type VARCHAR(50) NOT NULL,
-	CHECK(evaluation_type IN('Supervisor Feedback','Peer-to-peer Feedback','Project-based Feedback')),
-	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	updated_at TIMESTAMP,
-	company_id INTEGER REFERENCES company.company(id)
-);
+-- CREATE TABLE IF NOT EXISTS performance.evaluation_type (
+-- 	id SERIAL PRIMARY KEY,
+-- 	evaluation_type VARCHAR(50) NOT NULL,
+-- 	CHECK(evaluation_type IN('Supervisor Feedback','Peer-to-peer Feedback','Project-based Feedback')),
+-- 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+-- 	updated_at TIMESTAMP,
+-- 	company_id INTEGER REFERENCES company.company(id)
+-- );
 
-CREATE TABLE IF NOT EXISTS performance.evaluation_metric (
-	id SERIAL PRIMARY KEY,
-	metric VARCHAR(50) NOT NULL,
-	CHECK(metric IN('Job Knowledge and Expertise','Quality of Work','Productivity and Efficiency','Communication Skills','Problem-Solving and Innovation','Teamwork and Collaboration','Adaptability and Flexibility','Reliability and Accountability','Goal Completion','Commitment to Growth and Learning'))
-);
+-- CREATE TABLE IF NOT EXISTS performance.evaluation_metric (
+-- 	id SERIAL PRIMARY KEY,
+-- 	metric VARCHAR(50) NOT NULL,
+-- 	CHECK(metric IN('Job Knowledge and Expertise','Quality of Work','Productivity and Efficiency','Communication Skills','Problem-Solving and Innovation','Teamwork and Collaboration','Adaptability and Flexibility','Reliability and Accountability','Goal Completion','Commitment to Growth and Learning'))
+-- );
 
 CREATE TABLE IF NOT EXISTS performance.supervisor_rating ( -- when 'Supervisor Feedback' is chosen || only possible when HR opens the portal
 	id SERIAL PRIMARY KEY,
-	rater_id INTEGER REFERENCES employee.supervisor(id) NOT NULL, -- check whether supervisor or not
+	rater_id uuid REFERENCES employee.supervisor(id) NOT NULL, -- check whether supervisor or not
 	ratee_id uuid REFERENCES employee.employee(id) NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP,

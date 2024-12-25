@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS attendance.site (
     coordinates POINT NOT NULL,
     check_in TIMESTAMP NOT NULL,
     check_out TIMESTAMP NOT NULL,
-	company_id INTEGER REFERENCES company.company(id)
-    location TEXT NOT NULL, -- input map url
+	company_id INTEGER REFERENCES company.company(id),
+    location TEXT NOT NULL -- input map url
 );
 
 CREATE TABLE IF NOT EXISTS attendance.record (
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS attendance.leave_record ( -- checks if the leave bala
 	remarks VARCHAR(250),
 	status VARCHAR(10) DEFAULT 'Pending' NOT NULL,
 	CHECK (status IN ('Pending', 'Accepted', 'Rejected')),
-	approved_by_id INTEGER REFERENCES employee.supervisor(id),
+	approved_by_id uuid REFERENCES employee.supervisor(id),
 	employee_id uuid REFERENCES employee.employee(id),
 	company_id INTEGER REFERENCES company.company(id)
 );

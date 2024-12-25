@@ -6,14 +6,14 @@ CREATE TABLE IF NOT EXISTS transaction.payment_method (
 
 CREATE TABLE IF NOT EXISTS transaction.mfs_record (
 	id SERIAL PRIMARY KEY,
-	provider VARCHAR(25) NOT NULL,
+	provider VARCHAR(10) NOT NULL,
 	CHECK(provider IN('Bkash','Nagad','Upay','Rocket','Tap')),
 	company_id INTEGER REFERENCES company.company(id) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS transaction.mfs_transaction ( -- redirects to this if payment_method = MFS
 	id SERIAL PRIMARY KEY,
-	provider VARCHAR(25) REFERENCES transaction.mfs_record(provider) NOT NULL,
+	provider_id INTEGER REFERENCES transaction.mfs_record(id) NOT NULL,
 	date TIMESTAMP, -- Date of transaction
 	amount DECIMAL(10,2) NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

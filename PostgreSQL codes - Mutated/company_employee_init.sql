@@ -23,15 +23,16 @@ updated_at TIMESTAMP NOT NULL -- at update
 
 CREATE TABLE IF NOT EXISTS employee.user ( -- used for AUTHENTICATION & AUTHORIZATION with Supabase
     id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-	username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    is_active BOOLEAN DEFAULT FALSE NOT NULL, -- every session lasts for 60 minutes. If no activity for 60 minutes, the account logs out automatically. Account is only active if the tab / app is open last & last activity < 60 mins ago.
-    last_login TIMESTAMP NOT  NULL, -- is used to count session duration
-    has_approval BOOLEAN DEFAULT FALSE NOT NULL -- (to start/stop user usage)
+    last_login TIMESTAMP NOT  NULL -- is used to count session duration
 );
 
 CREATE TABLE IF NOT EXISTS employee.employee (
     id uuid PRIMARY KEY REFERENCES employee.user(id),
+	-- username VARCHAR(50) UNIQUE NOT NULL,
+    has_approval VARCHAR(8) DEFAULT 'PENDING' NOT NULL -- (to start/stop user usage)
+    CHECK(has_approval IN('ACCEPTED','REJECTED', 'PENDING')), -- PENDING is for new users
+    is_active BOOLEAN DEFAULT FALSE NOT NULL, -- every session lasts for 60 minutes. If no activity for 60 minutes, the account logs out automatically. Account is only active if the tab / app is open last & last activity < 60 mins ago.
+    email VARCHAR(100) UNIQUE NOT NULL,
 	company_id INTEGER REFERENCES company.company(id) NOT NULL,
     employee_id_input VARCHAR(20), -- MIR1238 indicates a specific employee || search functionality can be applied to this.
 	user_id uuid REFERENCES employee.user(id) UNIQUE,

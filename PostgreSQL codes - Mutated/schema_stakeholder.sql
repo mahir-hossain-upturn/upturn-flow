@@ -4,18 +4,16 @@
 --     CHECK (name IN ('Client', 'Supplier', 'Lead', 'Vendor'))
 -- );
 
--- CREATE TABLE IF NOT EXISTS stakeholder.category (
--- 	id SERIAL PRIMARY KEY,
---     name VARCHAR(20) NOT NULL,
---     CHECK (name IN ('Prospective','One-time','Recurring','On-Hold','Discontinued'))
--- );
+CREATE TABLE IF NOT EXISTS stakeholder.category (
+	id SERIAL PRIMARY KEY,
+    name VARCHAR(20) NOT NULL,
+    CHECK (name IN ('Prospective','One-time','Recurring','On-Hold','Discontinued'))
+);
 
 CREATE TABLE IF NOT EXISTS stakeholder.record (
 	id SERIAL PRIMARY KEY,
     type VARCHAR(20) NOT NULL,
-    CHECK (type IN ('Client', 'Supplier', 'Lead', 'Vendor'))
-	category VARCHAR(20) NOT NULL,
-    CHECK (category IN ('Prospective','One-time','Recurring','On-Hold','Discontinued'))
+    CHECK (type IN ('Client', 'Supplier', 'Lead', 'Vendor')),
     category_id INTEGER REFERENCES stakeholder.category(id) NOT NULL,
     stakeholder_name VARCHAR(100) NOT NULL,
 	description TEXT, -- details on the product / services being taken or rendered
@@ -44,18 +42,15 @@ CREATE TABLE IF NOT EXISTS stakeholder.interaction_p2 (
 	CHECK(type IN ('Give','Receive','Update'))
 );
 
--- CREATE TABLE IF NOT EXISTS stakeholder.activity_type ( -- Lead can only go with Update, other than that every other combination is possible
--- 	id SERIAL PRIMARY KEY,
--- 	interaction_p1_id INTEGER REFERENCES stakeholder.interaction_p1(id) NOT NULL,
--- 	interaction_p2_id INTEGER REFERENCES stakeholder.interaction_p2(id) NOT NULL
--- );
+CREATE TABLE IF NOT EXISTS stakeholder.activity_type ( -- Lead can only go with Update, other than that every other combination is possible
+	id SERIAL PRIMARY KEY,
+	interaction_p1_type_id INTEGER REFERENCES stakeholder.interaction_p1(id) NOT NULL,
+	interaction_p2_type_id INTEGER REFERENCES stakeholder.interaction_p2(id) NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS stakeholder.activity_log ( -- can one activity log reference another previous activity log with log_id as reference key? For example: reference one 'Receive Payment_Client 1' activity log with 'Give Service_Client 1' activity log.
 	id SERIAL PRIMARY KEY,
-	-- interaction_p1_id INTEGER REFERENCES stakeholder.interaction_p1(id) NOT NULL,
-	-- interaction_p2_id INTEGER REFERENCES stakeholder.interaction_p2(id) NOT NULL,
-	interaction_p1_type VARCHAR(10) REFERENCES stakeholder.interaction_p1(type) NOT NULL,
-	interaction_p2_type VARCHAR(10) REFERENCES stakeholder.interaction_p2(type) NOT NULL,
+	activity_type_id INTEGER REFERENCES stakeholder.activity_type(id) NOT NULL,
 	stakeholder_id INTEGER REFERENCES stakeholder.record(id) NOT NULL,
 	description VARCHAR(200),
 	deadline DATE,

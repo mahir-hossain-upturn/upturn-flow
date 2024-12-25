@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS employee.supervisor ( -- assigning who are supervisor
 
 CREATE TABLE IF NOT EXISTS employee.supervisor_employee ( -- assigning employees to supervisors
 	id SERIAL PRIMARY KEY,
-	supervisor_id INTEGER REFERENCES employee.supervisor(id) NOT NULL,
+	supervisor_id uuid REFERENCES employee.supervisor(id) NOT NULL,
 	employee_id uuid REFERENCES employee.employee(id) NOT NULL,
 	company_id INTEGER REFERENCES company.company(id) NOT NULL
 );

@@ -6,15 +6,15 @@ CREATE TABLE IF NOT EXISTS administration.notice_type (
 	updated_at TIMESTAMP -- on-update
 );
 
--- CREATE TABLE IF NOT EXISTS administration.company_notice (
--- 	id SERIAL PRIMARY KEY,
--- 	notice_type INTEGER REFERENCES administration.notice_type(id) NOT NULL,
--- 	company INTEGER REFERENCES company.company(id) NOT NULL
--- );
+CREATE TABLE IF NOT EXISTS administration.company_notice_type (
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(50) UNIQUE REFERENCES administration.notice_type(name) NOT NULL,
+	company INTEGER REFERENCES company.company(id) NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS administration.notice_record (
 	id SERIAL PRIMARY KEY,
-	notice_type VARCHAR(50) REFERENCES administration.notice_type(name) NOT NULL, -- need to only give the company specific notice option
+	notice_type VARCHAR(50) REFERENCES administration.company_notice_type(name) NOT NULL, -- need to only give the company specific notice option
 	title VARCHAR(200) NOT NULL,
 	description TEXT NOT NULL,
 	urgency VARCHAR(10) NOT NULL
@@ -23,9 +23,9 @@ CREATE TABLE IF NOT EXISTS administration.notice_record (
 	valid_till DATE NOT NULL, -- once validity lapses, archive the notice
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP,
-	company_id INTEGER REFERENCES company.company(id) NOT NULL
+	company_id INTEGER REFERENCES company.company(id) NOT NULL,
 	department_id INTEGER REFERENCES company.dept(id) NOT NULL,
-	unit_id INTEGER REFERENCES company.unit(id) NOT NULL,
+	unit_id INTEGER REFERENCES company.unit(id) NOT NULL
 );
 
 -- CREATE TABLE IF NOT EXISTS administration.notice_dept ( -- tag the notice to everyone of this dept.
@@ -44,20 +44,20 @@ CREATE TABLE IF NOT EXISTS administration.notice_record (
 
 CREATE TABLE IF NOT EXISTS administration.complaint_type (
 	id SERIAL PRIMARY KEY,
-	type VARCHAR(25) NOT NULL,
+	type VARCHAR(25) UNIQUE NOT NULL,
 	CHECK(type IN('Discrimination', 'Bullying', 'Harassment', 'Work Conditions', 'Workplace health & safety', 'Management', 'Work environment', 'Interpersonal Conflicts', 'Retaliation', 'Verbal abuse', 'Workload grievances', 'Workplace violence', 'Others')),
 	updated_at TIMESTAMP -- on-update
 );
 
--- CREATE TABLE IF NOT EXISTS administration.company_complaint (
--- 	id SERIAL PRIMARY KEY,
--- 	type VARCHAR(25) REFERENCES administration.complaint_type(type) NOT NULL,
--- 	company_id INTEGER REFERENCES company.company(id) NOT NULL
--- );
+CREATE TABLE IF NOT EXISTS administration.company_complaint_type (
+	id SERIAL PRIMARY KEY,
+	type VARCHAR(25) REFERENCES administration.complaint_type(type) NOT NULL,
+	company_id INTEGER REFERENCES company.company(id) NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS administration.compliant_record (
 	id SERIAL PRIMARY KEY,
-	type VARCHAR(25) REFERENCES administration.complaint_type(type) NOT NULL,
+	type_id INTEGER REFERENCES administration.company_complaint_type(id) NOT NULL,
 	complainer_id uuid REFERENCES employee.employee(id) NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP,

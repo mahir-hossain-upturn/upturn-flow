@@ -1,20 +1,20 @@
 CREATE TABLE IF NOT EXISTS administration.notice_type (
 	id SERIAL PRIMARY KEY,
-	name VARCHAR(50) NOT NULL,
+	name VARCHAR(50) UNIQUE NOT NULL,
 	CHECK(name IN('General Announcement', 'HR Update', 'Administrative Notice', 'Event', 'Policy Update', 'Training/Workshop', 'Others')),
 	is_default BOOLEAN DEFAULT FALSE NOT NULL,
 	updated_at TIMESTAMP -- on-update
 );
 
-CREATE TABLE IF NOT EXISTS administration.company_notice (
-	id SERIAL PRIMARY KEY,
-	notice_type INTEGER REFERENCES administration.notice_type(id) NOT NULL,
-	company INTEGER REFERENCES company.company(id) NOT NULL
-);
+-- CREATE TABLE IF NOT EXISTS administration.company_notice (
+-- 	id SERIAL PRIMARY KEY,
+-- 	notice_type INTEGER REFERENCES administration.notice_type(id) NOT NULL,
+-- 	company INTEGER REFERENCES company.company(id) NOT NULL
+-- );
 
 CREATE TABLE IF NOT EXISTS administration.notice_record (
 	id SERIAL PRIMARY KEY,
-	notice_type_id INTEGER REFERENCES administration.notice_type(id) NOT NULL, -- need to only give the company specific notice option
+	notice_type VARCHAR(50) REFERENCES administration.notice_type(name) NOT NULL, -- need to only give the company specific notice option
 	title VARCHAR(200) NOT NULL,
 	description TEXT NOT NULL,
 	urgency VARCHAR(10) NOT NULL
@@ -24,21 +24,23 @@ CREATE TABLE IF NOT EXISTS administration.notice_record (
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP,
 	company_id INTEGER REFERENCES company.company(id) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS administration.notice_dept ( -- tag the notice to everyone of this dept.
-	nd_id SERIAL PRIMARY KEY,
-	notice_record_id INTEGER REFERENCES administration.notice_record(id) NOT NULL,
 	department_id INTEGER REFERENCES company.dept(id) NOT NULL,
-	company_id INTEGER REFERENCES company.company(id) NOT NULL
+	unit_id INTEGER REFERENCES company.unit(id) NOT NULL,
 );
 
-CREATE TABLE IF NOT EXISTS administration.notice_unit ( -- tag the notice to everyone of this unit.
-	id SERIAL PRIMARY KEY,
-	notice_record_id INTEGER REFERENCES administration.notice_record(id) NOT NULL,
-	unit_id INTEGER REFERENCES company.unit(id) NOT NULL,
-	company_id INTEGER REFERENCES company.company(id) NOT NULL
-);
+-- CREATE TABLE IF NOT EXISTS administration.notice_dept ( -- tag the notice to everyone of this dept.
+-- 	nd_id SERIAL PRIMARY KEY,
+-- 	notice_record_id INTEGER REFERENCES administration.notice_record(id) NOT NULL,
+-- 	department_id INTEGER REFERENCES company.dept(id) NOT NULL,
+-- 	company_id INTEGER REFERENCES company.company(id) NOT NULL
+-- );
+
+-- CREATE TABLE IF NOT EXISTS administration.notice_unit ( -- tag the notice to everyone of this unit.
+-- 	id SERIAL PRIMARY KEY,
+-- 	notice_record_id INTEGER REFERENCES administration.notice_record(id) NOT NULL,
+-- 	unit_id INTEGER REFERENCES company.unit(id) NOT NULL,
+-- 	company_id INTEGER REFERENCES company.company(id) NOT NULL
+-- );
 
 CREATE TABLE IF NOT EXISTS administration.complaint_type (
 	id SERIAL PRIMARY KEY,
@@ -47,16 +49,16 @@ CREATE TABLE IF NOT EXISTS administration.complaint_type (
 	updated_at TIMESTAMP -- on-update
 );
 
-CREATE TABLE IF NOT EXISTS administration.company_complaint (
-	id SERIAL PRIMARY KEY,
-	complaint_type_id INTEGER REFERENCES administration.complaint_type(id) NOT NULL,
-	company_id INTEGER REFERENCES company.company(id) NOT NULL
-);
+-- CREATE TABLE IF NOT EXISTS administration.company_complaint (
+-- 	id SERIAL PRIMARY KEY,
+-- 	type VARCHAR(25) REFERENCES administration.complaint_type(type) NOT NULL,
+-- 	company_id INTEGER REFERENCES company.company(id) NOT NULL
+-- );
 
 CREATE TABLE IF NOT EXISTS administration.compliant_record (
 	id SERIAL PRIMARY KEY,
-	complaint_type_id INTEGER REFERENCES administration.complaint_type(id) NOT NULL,
-	complainer_id INTEGER REFERENCES employee.employee(id) NOT NULL,
+	type VARCHAR(25) REFERENCES administration.complaint_type(type) NOT NULL,
+	complainer_id uuid REFERENCES employee.employee(id) NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP,
 	description TEXT NOT NULL,
@@ -84,8 +86,8 @@ CREATE TABLE IF NOT EXISTS administration.claim_record (
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP,
 	approval BOOLEAN DEFAULT FALSE,
-	approved_by_id INTEGER REFERENCES employee.employee(id) NOT NULL,
-	claimant_id INTEGER REFERENCES employee.employee(id) NOT NULL, -- store id instead of name, though the claimant inputs his/her name
+	approved_by_id uuid REFERENCES employee.employee(id) NOT NULL,
+	claimant_id uuid REFERENCES employee.employee(id) NOT NULL, -- store id instead of name, though the claimant inputs his/her name
 	company_id INTEGER REFERENCES company.company(id) NOT NULL
 );
 
@@ -108,7 +110,7 @@ CREATE TABLE IF NOT EXISTS administration.requisition_inventory (
 CREATE TABLE IF NOT EXISTS administration.requisition_record (
 	id SERIAL PRIMARY KEY,
 	requisition_type_id INTEGER REFERENCES administration.requisition_type(id) NOT NULL,
-	employee_id INTEGER REFERENCES employee.employee(id) NOT NULL, -- can be IT-user for discarding or employee-user for acquiring
+	employee_id uuid REFERENCES employee.employee(id) NOT NULL, -- can be IT-user for discarding or employee-user for acquiring
 	quantity INT NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP,

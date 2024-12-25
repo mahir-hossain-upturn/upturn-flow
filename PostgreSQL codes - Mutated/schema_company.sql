@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS company.currency (
 CREATE TABLE IF NOT EXISTS company.division (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
-    head_id INTEGER REFERENCES employee.employee(id),
+    head_id uuid REFERENCES employee.employee(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL, -- at update
     company_id INTEGER REFERENCES company.company(id) NOT NULL
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS company.division (
 CREATE TABLE IF NOT EXISTS company.dept (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
-    head_id INTEGER REFERENCES employee.employee(id),
+    head_id uuid REFERENCES employee.employee(id),
     description TEXT, -- input the JD here || create a rich text dialog box
     company_id INTEGER REFERENCES company.company(id) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS company.dept (
 CREATE TABLE IF NOT EXISTS company.unit (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
-    head_id INTEGER REFERENCES employee.employee(id),
+    head_id uuid REFERENCES employee.employee(id),
     company_id INTEGER REFERENCES company.company(id) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP NOT NULL -- at update
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS company.role (
     name VARCHAR(50) NOT NULL,
     CHECK(name IN('Super Admin','Admin','HR','Supervisor','End User')),
     company_id INTEGER REFERENCES company.company(id) NOT NULL,
-    employee_id INTEGER REFERENCES employee.employee(id) NOT NULL,
+    employee_id uuid REFERENCES employee.employee(id) NOT NULL,
     is_active BOOLEAN DEFAULT TRUE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL -- at update

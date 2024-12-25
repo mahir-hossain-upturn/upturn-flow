@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS transaction.mfs_record (
 
 CREATE TABLE IF NOT EXISTS transaction.mfs_transaction ( -- redirects to this if payment_method = MFS
 	id SERIAL PRIMARY KEY,
-	provider_id INTEGER REFERENCES transaction.mfs_record(id) NOT NULL,
+	provider VARCHAR(25) REFERENCES transaction.mfs_record(provider) NOT NULL,
 	date TIMESTAMP, -- Date of transaction
 	amount DECIMAL(10,2) NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS transaction.mfs_transaction ( -- redirects to this if
 	recipient_number INT NOT NULL,
 	recipient_name VARCHAR(50) NOT NULL,
 	remark VARCHAR(200),
-	approved_by_id INTEGER REFERENCES employee.employee(id),
+	approved_by_id uuid REFERENCES employee.employee(id),
 	company_id INTEGER REFERENCES company.company(id) NOT NULL
 );
 
@@ -34,14 +34,14 @@ CREATE TABLE IF NOT EXISTS transaction.cash_transaction ( -- redirects to this i
 	updated_at TIMESTAMP,
 	recipient_name VARCHAR(50) NOT NULL,
 	remark VARCHAR(200),
-	approved_by_id INTEGER REFERENCES employee.employee(id),
+	approved_by_id uuid REFERENCES employee.employee(id),
 	company_id INTEGER REFERENCES company.company(id) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS transaction.bank (
 	id SERIAL PRIMARY KEY,
 	country_id INTEGER REFERENCES company.country(id) NOT NULL,
-	bank_name VARCHAR(50) NOT NULL
+	name VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS transaction.bank_account (
@@ -65,6 +65,6 @@ CREATE TABLE IF NOT EXISTS transaction.bank_transaction ( -- redirects to this i
 	remark VARCHAR(200),
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP,
-	approved_by_id INTEGER REFERENCES employee.employee(id),
+	approved_by_id uuid REFERENCES employee.employee(id),
 	company_id INTEGER REFERENCES company.company(id) NOT NULL
 );

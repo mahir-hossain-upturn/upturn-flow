@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS administration.notice_record (
 );
 
 CREATE TABLE IF NOT EXISTS administration.notice_dept ( -- tag the notice to everyone of this dept.
-	nd_id SERIAL PRIMARY KEY,
+	id SERIAL PRIMARY KEY,
 	notice_record_id INTEGER REFERENCES administration.notice_record(id) NOT NULL,
 	department_id INTEGER REFERENCES company.dept(id) NOT NULL,
 	company_id INTEGER REFERENCES company.company(id) NOT NULL

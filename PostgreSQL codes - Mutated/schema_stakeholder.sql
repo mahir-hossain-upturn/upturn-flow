@@ -1,18 +1,21 @@
-CREATE TABLE IF NOT EXISTS stakeholder.type (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(20) NOT NULL,
-    CHECK (name IN ('Client', 'Supplier', 'Lead', 'Vendor'))
-);
+-- CREATE TABLE IF NOT EXISTS stakeholder.type (
+--     id SERIAL PRIMARY KEY,
+--     name VARCHAR(20) NOT NULL,
+--     CHECK (name IN ('Client', 'Supplier', 'Lead', 'Vendor'))
+-- );
 
-CREATE TABLE IF NOT EXISTS stakeholder.category (
-	id SERIAL PRIMARY KEY,
-    name VARCHAR(20) NOT NULL,
-    CHECK (name IN ('Prospective','One-time','Recurring','On-Hold','Discontinued'))
-);
+-- CREATE TABLE IF NOT EXISTS stakeholder.category (
+-- 	id SERIAL PRIMARY KEY,
+--     name VARCHAR(20) NOT NULL,
+--     CHECK (name IN ('Prospective','One-time','Recurring','On-Hold','Discontinued'))
+-- );
 
 CREATE TABLE IF NOT EXISTS stakeholder.record (
 	id SERIAL PRIMARY KEY,
-    stakeholder_type_id INTEGER REFERENCES stakeholder.type(id) NOT NULL,
+    type VARCHAR(20) NOT NULL,
+    CHECK (type IN ('Client', 'Supplier', 'Lead', 'Vendor'))
+	category VARCHAR(20) NOT NULL,
+    CHECK (category IN ('Prospective','One-time','Recurring','On-Hold','Discontinued'))
     category_id INTEGER REFERENCES stakeholder.category(id) NOT NULL,
     stakeholder_name VARCHAR(100) NOT NULL,
 	description TEXT, -- details on the product / services being taken or rendered
@@ -31,29 +34,32 @@ CREATE TABLE IF NOT EXISTS stakeholder.record (
 
 CREATE TABLE IF NOT EXISTS stakeholder.interaction_p1 (
 	id SERIAL PRIMARY KEY,
-	interaction_type VARCHAR(10) NOT NULL,
-	CHECK(interaction_type IN ('Service','Product','Payment','Lead'))
+	type VARCHAR(10) NOT NULL,
+	CHECK(type IN ('Service','Product','Payment','Lead'))
 );
 
 CREATE TABLE IF NOT EXISTS stakeholder.interaction_p2 (
 	id SERIAL PRIMARY KEY,
-	interaction_type VARCHAR(10) NOT NULL,
-	CHECK(interaction_type IN ('Give','Receive','Update'))
+	type VARCHAR(10) NOT NULL,
+	CHECK(type IN ('Give','Receive','Update'))
 );
 
-CREATE TABLE IF NOT EXISTS stakeholder.activity_type ( -- Lead can only go with Update, other than that every other combination is possible
-	id SERIAL PRIMARY KEY,
-	interaction_p1_id INTEGER REFERENCES stakeholder.interaction_p1(id) NOT NULL,
-	interaction_p2_id INTEGER REFERENCES stakeholder.interaction_p2(id) NOT NULL
-);
+-- CREATE TABLE IF NOT EXISTS stakeholder.activity_type ( -- Lead can only go with Update, other than that every other combination is possible
+-- 	id SERIAL PRIMARY KEY,
+-- 	interaction_p1_id INTEGER REFERENCES stakeholder.interaction_p1(id) NOT NULL,
+-- 	interaction_p2_id INTEGER REFERENCES stakeholder.interaction_p2(id) NOT NULL
+-- );
 
 CREATE TABLE IF NOT EXISTS stakeholder.activity_log ( -- can one activity log reference another previous activity log with log_id as reference key? For example: reference one 'Receive Payment_Client 1' activity log with 'Give Service_Client 1' activity log.
 	id SERIAL PRIMARY KEY,
-	activity_type_id INTEGER REFERENCES stakeholder.activity_type(id) NOT NULL,
+	-- interaction_p1_id INTEGER REFERENCES stakeholder.interaction_p1(id) NOT NULL,
+	-- interaction_p2_id INTEGER REFERENCES stakeholder.interaction_p2(id) NOT NULL,
+	interaction_p1_type VARCHAR(10) REFERENCES stakeholder.interaction_p1(type) NOT NULL,
+	interaction_p2_type VARCHAR(10) REFERENCES stakeholder.interaction_p2(type) NOT NULL,
 	stakeholder_id INTEGER REFERENCES stakeholder.record(id) NOT NULL,
 	description VARCHAR(200),
 	deadline DATE,
-	assigned_id INTEGER REFERENCES employee.employee(id),
+	assigned_id uuid REFERENCES employee.employee(id),
 	company_id INTEGER REFERENCES company.company(id) NOT NULL,
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP
@@ -64,7 +70,7 @@ CREATE TABLE IF NOT EXISTS stakeholder.issue ( -- create issue || resolve issue
 	has_issue BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	updated_at TIMESTAMP NOT NULL, -- on update i.e., resolve issue
-    created_by_id INTEGER REFERENCES employee.employee(id) NOT NULL,
+    created_by_id uuid REFERENCES employee.employee(id) NOT NULL,
 	description TEXT,
 	stakeholder_id INTEGER REFERENCES stakeholder.record(id) NOT NULL,
 	company_id INTEGER REFERENCES company.company(id) NOT NULL
@@ -100,7 +106,7 @@ CREATE TABLE IF NOT EXISTS stakeholder.payment_approval(
 	id SERIAL PRIMARY KEY,
 	payment_log_id INTEGER REFERENCES stakeholder.transaction(id),
 	approval BOOLEAN DEFAULT FALSE, -- true = approved
-	approved_by_id INTEGER REFERENCES employee.employee(id),
+	approved_by_id uuid REFERENCES employee.employee(id),
 	company_id INTEGER REFERENCES company.company(id)
 );
 

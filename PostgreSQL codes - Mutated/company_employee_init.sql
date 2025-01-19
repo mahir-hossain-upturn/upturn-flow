@@ -34,8 +34,8 @@ CREATE TABLE IF NOT EXISTS employee.employee (
     is_active BOOLEAN DEFAULT FALSE NOT NULL, -- every session lasts for 60 minutes. If no activity for 60 minutes, the account logs out automatically. Account is only active if the tab / app is open last & last activity < 60 mins ago.
     email VARCHAR(100) UNIQUE NOT NULL,
 	company_id INTEGER REFERENCES company.company(id) NOT NULL,
+    -- ! idk why this is required
     employee_id_input VARCHAR(20), -- MIR1238 indicates a specific employee || search functionality can be applied to this.
-	user_id uuid REFERENCES employee.user(id) UNIQUE,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     phone_number VARCHAR(20),

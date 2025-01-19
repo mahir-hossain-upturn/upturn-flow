@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS employee.employee_designation (
 CREATE TABLE IF NOT EXISTS employee.employee_address (
 	id SERIAL PRIMARY KEY,
     employee_id uuid REFERENCES employee.employee(id),
+    -- ! THIS NEEDS ATTENTION
     address_id INTEGER REFERENCES company.address(id) NOT NULL,
     company_id INTEGER REFERENCES company.company(id) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -36,7 +37,7 @@ CREATE TABLE IF NOT EXISTS employee.personal_info (
     emergency_contact_name VARCHAR(50), -- put a tick mark beside the father / mother / spouse box, if chosen contact_name and relation not required, otherwise take input (can be of a friend)
     emergency_contact_phone VARCHAR(20),
     emergency_contact_relation VARCHAR(15), -- can be brother, friend
-    company_id INTEGER REFERENCES company.company(id)
+    company_id INTEGER NOT NULL REFERENCES company.company(id)
 );
 
 CREATE TABLE IF NOT EXISTS employee.qualification_type ( -- for the time being, just create the table and not link it with anything else
@@ -47,15 +48,15 @@ CHECK(name IN('Training','Specialization','Schooling','Project','Publication'))
 
 CREATE TABLE IF NOT EXISTS employee.schooling (
     id SERIAL PRIMARY KEY,
-    degree_type VARCHAR(50) NOT NULL, -- provide drop-down from front-end
+    type VARCHAR(50) NOT NULL, -- provide drop-down from front-end
     CHECK(degree_type IN('High School','College','Diploma','Bachelors','Masters','PGD','PhD','Post-Doc')),
-    degree_name VARCHAR(50) NOT NULL,
+    name VARCHAR(50) NOT NULL,
     institute VARCHAR(100) NOT NULL,
     from_date DATE NOT NULL,
     to_date DATE NOT NULL,
     result VARCHAR(15) NOT NULL, -- GPA / CGPA / Division
-    employee_id uuid REFERENCES employee.employee(id),
-    company_id INTEGER REFERENCES company.company(id)
+    employee_id uuid NOT NULL REFERENCES employee.employee(id),
+    company_id INTEGER NOT NULL REFERENCES company.company(id)
 );
 
 CREATE TABLE IF NOT EXISTS employee.experience (
